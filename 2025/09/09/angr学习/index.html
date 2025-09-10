@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>angr学习 | wlmt666的博客</title><meta name="author" content="胡楚昊"><meta name="copyright" content="胡楚昊"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="angr符号执行框架，是我一直想要理解学习的，今天就来实际学习体验一下。 根据网上教的，应该是在GitHub - jakespringer&#x2F;angr_ctf 网站上面下载对应的习题，编写对应的python进行练习。 前置要求：安装angr库，我已经满足，接下来就开始进行捣鼓。 angr的原理我也不太能解释清楚，所以直接开干吧。（默认python代码均引入angr库） 因此，使用 angr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="angr学习">
+<meta property="og:url" content="https://wlmt666.github.io/2025/09/09/angr%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="wlmt666的博客">
+<meta property="og:description" content="angr符号执行框架，是我一直想要理解学习的，今天就来实际学习体验一下。 根据网上教的，应该是在GitHub - jakespringer&#x2F;angr_ctf 网站上面下载对应的习题，编写对应的python进行练习。 前置要求：安装angr库，我已经满足，接下来就开始进行捣鼓。 angr的原理我也不太能解释清楚，所以直接开干吧。（默认python代码均引入angr库） 因此，使用 angr">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wlmt666.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2025-09-09T11:29:25.000Z">
+<meta property="article:modified_time" content="2025-09-10T12:10:22.494Z">
+<meta property="article:author" content="胡楚昊">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wlmt666.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "angr学习",
+  "url": "https://wlmt666.github.io/2025/09/09/angr%E5%AD%A6%E4%B9%A0/",
+  "image": "https://wlmt666.github.io/img/butterfly-icon.png",
+  "datePublished": "2025-09-09T11:29:25.000Z",
+  "dateModified": "2025-09-10T12:10:22.494Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "胡楚昊",
+      "url": "https://wlmt666.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="../../../../img/favicon.png"><link rel="canonical" href="https://wlmt666.github.io/2025/09/09/angr%E5%AD%A6%E4%B9%A0/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="../../../../css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'angr学习',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/modify.css"><link rel="stylesheet" href="/css/wlmt666.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="../../../../index.html"><span class="site-name">wlmt666的博客</span></a><a class="nav-page-title" href="../../../../index.html"><span class="site-name">angr学习</span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">angr学习</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-09T11:29:25.000Z" title="发表于 2025-09-09 19:29:25">2025-09-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-10T12:10:22.494Z" title="更新于 2025-09-10 20:10:22">2025-09-10</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>angr符号执行框架，是我一直想要理解学习的，今天就来实际学习体验一下。</p>
+<p>根据网上教的，应该是在<a target="_blank" rel="noopener" href="https://github.com/jakespringer/angr_ctf">GitHub - jakespringer&#x2F;angr_ctf</a> 网站上面下载对应的习题，编写对应的python进行练习。</p>
+<p>前置要求：安装angr库，我已经满足，接下来就开始进行捣鼓。</p>
+<p>angr的原理我也不太能解释清楚，所以直接开干吧。（默认python代码均引入angr库）</p>
+<p>因此，使用 angr 一般分为如下步骤：</p>
+<ol>
+<li>创建 Project，预设 state</li>
+<li>创建位向量和符号变量，保存在内存&#x2F;寄存器&#x2F;文件或其他地方（简单的题目直接可以省略）</li>
+<li>将 state 添加到 SM 中</li>
+<li>运行，探索满足条件的路径</li>
+<li>约束求解获取执行结果</li>
+</ol>
+<h3 id="1-angr-find"><a href="#1-angr-find" class="headerlink" title="1-angr-find"></a>1-angr-find</h3><p>用这个作为入门吧。分析一下代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> i; <span class="comment">// [esp+1Ch] [ebp-1Ch]</span></span><br><span class="line">  <span class="type">char</span> s1[<span class="number">9</span>]; <span class="comment">// [esp+23h] [ebp-15h] BYREF</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> v6; <span class="comment">// [esp+2Ch] [ebp-Ch]</span></span><br><span class="line"></span><br><span class="line">  v6 = __readgsdword(<span class="number">0x14u</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Enter the password: &quot;</span>);</span><br><span class="line">  __isoc99_scanf(<span class="string">&quot;%8s&quot;</span>, s1);</span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt;= <span class="number">7</span>; ++i )</span><br><span class="line">    s1[i] = complex_function(s1[i], i);</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(s1, <span class="string">&quot;JACEJGCS&quot;</span>) )</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;Good Job.&quot;</span>);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;Try again.&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据学习的知识，首先应该创建一个project。</p>
+<p><code>p = angr.Project(&quot;./00&quot;,auto_load_libs=&#39;false&#39;)</code></p>
+<p>为了提高效率，不自动加载依赖库。</p>
+<p>然后应该创建一个state，就是作为一个镜像(<code>Project</code> 仅完成二进制文件加载，执行操作实际围绕 <code>SimState</code> 对象（程序状态）开展。  类似于做了一个镜像)</p>
+<p>要创建状态，需借助 <code>Project</code> 对象的 <code>factory</code>，它还可用于创建模拟管理器、基本块</p>
+<p><code>state=p.factory.entry_state()</code></p>
+<p>上述方式只是预设了程序开始分析时的状态，我们要分析程序就必须要让它到达下一个状态，这就需要<br>模拟管理器的帮助（简称 SM）</p>
+<p><code>sm = p.factory.simgr(state)</code></p>
+<p>可以通过 step() 方法来让处于 active 的 state 执行一个基本块，这种操作不会改变 state 本身（类比 docker）state只是一个镜像而已，进入SM才有执行的可能性:</p>
+<p>可以使用 explorer 方法去执行某个状态，直到找到目标指令或者 active 中没有状态为止，它有如下参数：</p>
+<ul>
+<li>find：传入目标指令的地址或地址列表，或者一个用于判断的函数</li>
+<li>avoid：传入要避免的指令的地址或地址列表，或者一个用于判断的函数，用于减少路径</li>
+</ul>
+<p>第一关还是比较简单的，下面就是脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> angr</span><br><span class="line">p = angr.Project(<span class="string">&quot;./00&quot;</span>)</span><br><span class="line">state=p.factory.entry_state()</span><br><span class="line">sm = p.factory.simgr(state)</span><br><span class="line">sm.explore(find=<span class="number">0x8048675</span>)</span><br><span class="line"><span class="keyword">if</span> sm.found:</span><br><span class="line">    <span class="built_in">print</span>(sm.found[<span class="number">0</span>].posix.dumps(<span class="number">0</span>))</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-angr-avoid"><a href="#2-angr-avoid" class="headerlink" title="2-angr-avoid"></a>2-angr-avoid</h3><p>这一关卡需要进行avoid。因为主函数太大了！为什么主函数大？一个函数“avoid me”在主函数被反复调用。只需要增加avoid参数即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> angr</span><br><span class="line">p = angr.Project(<span class="string">&quot;./01&quot;</span>)</span><br><span class="line">state=p.factory.entry_state()</span><br><span class="line">sm = p.factory.simgr(state)</span><br><span class="line">sm.explore(find=<span class="number">0x80485B5</span>,avoid=<span class="number">0x80485A8</span>)</span><br><span class="line"><span class="keyword">if</span> sm.found:</span><br><span class="line">    <span class="built_in">print</span>(sm.found[<span class="number">0</span>].posix.dumps(<span class="number">0</span>))</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-angr-find-condition"><a href="#3-angr-find-condition" class="headerlink" title="3-angr-find-condition"></a>3-angr-find-condition</h3><p>这里引入新的概念：利用函数，传给find和avoid，什么意思呢？</p>
+<p>函数的return表示“找到这个函数的条件”dump(1)表示标准输出。</p>
+<p>这是一个具体实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">find</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Good Job.&#x27;</span> <span class="keyword">in</span> state.posix.dump(<span class="number">1</span>)<span class="comment">#标准输出</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">avoid</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Try again.&#x27;</span> <span class="keyword">in</span> state.posix.dump(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>程序在正确的时候会提示字符串，所以可以从这里入手。给explore传参只需要传递函数名即可</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> angr</span><br><span class="line">p = angr.Project(<span class="string">&quot;./02&quot;</span>)</span><br><span class="line">state=p.factory.entry_state()</span><br><span class="line">sm = p.factory.simgr(state)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Good Job.&#x27;</span> <span class="keyword">in</span> state.posix.dumps(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">avoid</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Try again.&#x27;</span> <span class="keyword">in</span> state.posix.dumps(<span class="number">1</span>)</span><br><span class="line">sm.explore(find=find,avoid=avoid)</span><br><span class="line"><span class="keyword">if</span> sm.found:</span><br><span class="line">    <span class="built_in">print</span>(sm.found[<span class="number">0</span>].posix.dumps(<span class="number">0</span>))</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-angr-symbolic-registers"><a href="#4-angr-symbolic-registers" class="headerlink" title="4-angr_symbolic_registers"></a>4-angr_symbolic_registers</h3><p>开始介绍怎么给寄存器传入对应的初始量了。这一题很有意思，输入做了拆分，通过ecx寄存器做中间人将值最终放在eax、ebx、edx寄存器。</p>
+<p>所以我们需要求出三个未知量，自然需要做出调整，这里介绍angr里面的变量类型。我们想要从程序的某个地方开始执行，就需要用到blank_state(addr&#x3D;0xxxx)。我们可以跳过拆分输入的环节，直接设置符号变量让他求解。</p>
+<p>BVS设置为32位，因为一个Int占32位。</p>
+<p>不要忘记再给寄存器传入我们的参数，按照源程序的顺序给即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> angr</span><br><span class="line"><span class="keyword">import</span> claripy</span><br><span class="line">p = angr.Project(<span class="string">&quot;./03&quot;</span>)</span><br><span class="line">state=p.factory.blank_state(addr=<span class="number">0x8048980</span>)</span><br><span class="line">x = claripy.BVS(<span class="string">&quot;x&quot;</span>,<span class="number">32</span>)</span><br><span class="line">y = claripy.BVS(<span class="string">&quot;y&quot;</span>,<span class="number">32</span>)</span><br><span class="line">z = claripy.BVS(<span class="string">&quot;z&quot;</span>,<span class="number">32</span>)</span><br><span class="line">state.regs.eax=x</span><br><span class="line">state.regs.ebx=y</span><br><span class="line">state.regs.edx=z</span><br><span class="line">sm = p.factory.simgr(state)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Good Job.&#x27;</span> <span class="keyword">in</span> state.posix.dumps(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">avoid</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Try again.&#x27;</span> <span class="keyword">in</span> state.posix.dumps(<span class="number">1</span>)</span><br><span class="line">sm.explore(find=find,avoid=avoid)</span><br><span class="line"><span class="keyword">if</span> sm.found:</span><br><span class="line">    x=sm.found[<span class="number">0</span>].solver.<span class="built_in">eval</span>(x)</span><br><span class="line">    y=sm.found[<span class="number">0</span>].solver.<span class="built_in">eval</span>(y)</span><br><span class="line">    z=sm.found[<span class="number">0</span>].solver.<span class="built_in">eval</span>(z)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;<span class="built_in">hex</span>(x)&#125;</span> <span class="subst">&#123;<span class="built_in">hex</span>(y)&#125;</span> <span class="subst">&#123;<span class="built_in">hex</span>(z)&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>说实话，跟着教程走还是比较好理解的，记住关键的函数名字即可。</p>
+<h3 id="5-angr-symbolic-stack"><a href="#5-angr-symbolic-stack" class="headerlink" title="5-angr_symbolic_stack"></a>5-angr_symbolic_stack</h3><p>这个题目开始模拟栈。</p>
+<p>这里的scanf的参数又直接压到了栈上。</p>
+<p>我们只需要关心求解的未知数在栈上的布局即可，其他的栈内容无需操心，也不会影响大局。</p>
+<p>还需要知道的是，blank_state会初始化esp，但是不会初始化ebp，我们可以用esp给ebp赋值，进而初始化栈。</p>
+<p>根据ida的栈布局，确定esp相对位置。刚开始肯定是要esp刚好指向两个未知变量栈的下面。这样子push完之后也恰好满足原函数的栈布局。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> angr</span><br><span class="line"><span class="keyword">import</span> claripy</span><br><span class="line">p = angr.Project(<span class="string">&quot;./04&quot;</span>)</span><br><span class="line">state=p.factory.blank_state(addr=<span class="number">0x08048697</span>)</span><br><span class="line">x = claripy.BVS(<span class="string">&quot;x&quot;</span>,<span class="number">32</span>)</span><br><span class="line">y = claripy.BVS(<span class="string">&quot;y&quot;</span>,<span class="number">32</span>)</span><br><span class="line">state.regs.ebp=state.regs.esp</span><br><span class="line">state.regs.esp -= <span class="number">8</span><span class="comment">#根据ida确认</span></span><br><span class="line">state.stack_push(x)</span><br><span class="line">state.stack_push(y)</span><br><span class="line">sm = p.factory.simgr(state)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Good Job.&#x27;</span> <span class="keyword">in</span> state.posix.dumps(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">avoid</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Try again.&#x27;</span> <span class="keyword">in</span> state.posix.dumps(<span class="number">1</span>)</span><br><span class="line">sm.explore(find=find,avoid=avoid)</span><br><span class="line"><span class="keyword">if</span> sm.found:</span><br><span class="line">    x=sm.found[<span class="number">0</span>].solver.<span class="built_in">eval</span>(x)</span><br><span class="line">    y=sm.found[<span class="number">0</span>].solver.<span class="built_in">eval</span>(y)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;x&#125;</span> <span class="subst">&#123;y&#125;</span> &quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-angr-symbolic-memroy"><a href="#6-angr-symbolic-memroy" class="headerlink" title="6-angr_symbolic_memroy"></a>6-angr_symbolic_memroy</h3><p>操作内存。这个程序直接使用memset函数在bss段开辟了一些地方存储输入的数据，这就需要控制内存</p>
+<p>读写内存：state.memory.store&#x2F;load。只需要往对应内存地带写入数据即可。</p>
+<p>说明:可以利用store配合寄存器寻址，如state.regs.ebp-0x1c，也可以识别得到。</p>
+<p>还需要注意的是，这里的是字符串，因此需要用cast_to强制转换，并需用 <code>decode()</code> 转换为可读字符串</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> angr</span><br><span class="line"><span class="keyword">import</span> claripy</span><br><span class="line">p = angr.Project(<span class="string">&quot;./05&quot;</span>)</span><br><span class="line">state=p.factory.blank_state(addr=<span class="number">0x08048601</span>)</span><br><span class="line">x = claripy.BVS(<span class="string">&quot;x&quot;</span>,<span class="number">64</span>)<span class="comment">#这里需要改为64位，因为是8个字符</span></span><br><span class="line">y = claripy.BVS(<span class="string">&quot;y&quot;</span>,<span class="number">64</span>)</span><br><span class="line">z = claripy.BVS(<span class="string">&quot;z&quot;</span>,<span class="number">64</span>)</span><br><span class="line">a = claripy.BVS(<span class="string">&quot;a&quot;</span>,<span class="number">64</span>)</span><br><span class="line">state.memory.store(<span class="number">0xA1BA1C0</span>,x)</span><br><span class="line">state.memory.store(<span class="number">0xA1BA1C8</span>,y)</span><br><span class="line">state.memory.store(<span class="number">0xA1BA1D0</span>,z)</span><br><span class="line">state.memory.store(<span class="number">0xA1BA1D8</span>,a)</span><br><span class="line">sm = p.factory.simgr(state)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Good Job.&#x27;</span> <span class="keyword">in</span> state.posix.dumps(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">avoid</span>(<span class="params">state</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">b&#x27;Try again.&#x27;</span> <span class="keyword">in</span> state.posix.dumps(<span class="number">1</span>)</span><br><span class="line">sm.explore(find=find,avoid=avoid)</span><br><span class="line"><span class="keyword">if</span> sm.found:</span><br><span class="line">    x=sm.found[<span class="number">0</span>].solver.<span class="built_in">eval</span>(x,cast_to=<span class="built_in">bytes</span>).decode()</span><br><span class="line">    y=sm.found[<span class="number">0</span>].solver.<span class="built_in">eval</span>(y,cast_to=<span class="built_in">bytes</span>).decode()</span><br><span class="line">    z=sm.found[<span class="number">0</span>].solver.<span class="built_in">eval</span>(z,cast_to=<span class="built_in">bytes</span>).decode()</span><br><span class="line">    a=sm.found[<span class="number">0</span>].solver.<span class="built_in">eval</span>(a,cast_to=<span class="built_in">bytes</span>).decode()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;x&#125;</span> <span class="subst">&#123;y&#125;</span> <span class="subst">&#123;z&#125;</span> <span class="subst">&#123;a&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://wlmt666.github.io">胡楚昊</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://wlmt666.github.io/2025/09/09/angr%E5%AD%A6%E4%B9%A0/">https://wlmt666.github.io/2025/09/09/angr%E5%AD%A6%E4%B9%A0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://wlmt666.github.io" target="_blank">wlmt666的博客</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="../../../../img/butterfly-icon.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width no-desc" href="../../../07/04/i/" title="i"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">i</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="../../../../img/butterfly-icon.png" onerror="this.onerror=null;this.src='../../../../img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">胡楚昊</div><div class="author-info-description"></div><div class="site-data"><a href="../../../../archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="../../../../tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="../../../../categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/wlmt666"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">热爱网安的菜鸟一枚</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-angr-find"><span class="toc-number">1.</span> <span class="toc-text">1-angr-find</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-angr-avoid"><span class="toc-number">2.</span> <span class="toc-text">2-angr-avoid</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-angr-find-condition"><span class="toc-number">3.</span> <span class="toc-text">3-angr-find-condition</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-angr-symbolic-registers"><span class="toc-number">4.</span> <span class="toc-text">4-angr_symbolic_registers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-angr-symbolic-stack"><span class="toc-number">5.</span> <span class="toc-text">5-angr_symbolic_stack</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-angr-symbolic-memroy"><span class="toc-number">6.</span> <span class="toc-text">6-angr_symbolic_memroy</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../../../09/09/angr%E5%AD%A6%E4%B9%A0/" title="angr学习">angr学习</a><time datetime="2025-09-09T11:29:25.000Z" title="发表于 2025-09-09 19:29:25">2025-09-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../../../07/04/i/" title="i">i</a><time datetime="2025-07-04T14:25:30.000Z" title="发表于 2025-07-04 22:25:30">2025-07-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="" title="一道EzTea，很有价值的题目">一道EzTea，很有价值的题目</a><time datetime="2025-06-30T12:05:52.000Z" title="发表于 2025-06-30 20:05:52">2025-06-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../../26/hello-world/" title="Hello World">Hello World</a><time datetime="2025-06-26T10:26:17.011Z" title="发表于 2025-06-26 18:26:17">2025-06-26</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent;"><div id="footer-wrap"><div class="copyright">&copy;2025 By 胡楚昊</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="../../../../js/utils.js"></script><script src="../../../../js/main.js"></script><div class="js-pjax"></div><script type="text/javascript" src="/js/wlmt666.js"></script><script type="text/javascript" src="/js/sakura.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
