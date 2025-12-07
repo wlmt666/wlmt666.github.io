@@ -1,7 +1,7 @@
 /* 背景透明度 */
 :root {
-    --trans-light: rgba(255, 255, 255, 0.8);
-    --trans-dark: rgba(25, 25, 25, 0.8);
+    --trans-light: rgba(255, 255, 255, 0.99);
+    --trans-dark: rgba(25, 25, 25, 0.99);
 }
 
 /* 首页文章卡片 */
