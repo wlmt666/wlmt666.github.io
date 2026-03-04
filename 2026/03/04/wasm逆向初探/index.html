@@ -1,0 +1,210 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>wasm逆向初探 | wlmt666的博客</title><meta name="author" content="胡楚昊"><meta name="copyright" content="胡楚昊"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="refer： https:&#x2F;&#x2F;wsxk.github.io&#x2F;wasm_re&#x2F; https:&#x2F;&#x2F;xz.aliyun.com&#x2F;news&#x2F;12917#toc-1 https:&#x2F;&#x2F;xz.aliyun.com&#x2F;news&#x2F;13187 前言前些日子打吾爱破解红包赛事，了解到还有wasm这个号称”运行在浏览器上的汇编“的类似于asm的汇编语言。 它的开发教程可以见这个文章：https:&#x2F;&#x2F;www.wasm.com">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wasm逆向初探">
+<meta property="og:url" content="https://wlmt666.top/2026/03/04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/index.html">
+<meta property="og:site_name" content="wlmt666的博客">
+<meta property="og:description" content="refer： https:&#x2F;&#x2F;wsxk.github.io&#x2F;wasm_re&#x2F; https:&#x2F;&#x2F;xz.aliyun.com&#x2F;news&#x2F;12917#toc-1 https:&#x2F;&#x2F;xz.aliyun.com&#x2F;news&#x2F;13187 前言前些日子打吾爱破解红包赛事，了解到还有wasm这个号称”运行在浏览器上的汇编“的类似于asm的汇编语言。 它的开发教程可以见这个文章：https:&#x2F;&#x2F;www.wasm.com">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wlmt666.top/img/butterfly-icon.png">
+<meta property="article:published_time" content="2026-03-04T09:14:24.000Z">
+<meta property="article:modified_time" content="2026-03-04T12:03:19.163Z">
+<meta property="article:author" content="胡楚昊">
+<meta property="article:tag" content="re">
+<meta property="article:tag" content="wasm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wlmt666.top/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "wasm逆向初探",
+  "url": "https://wlmt666.top/2026/03/04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/",
+  "image": "https://wlmt666.top/img/butterfly-icon.png",
+  "datePublished": "2026-03-04T09:14:24.000Z",
+  "dateModified": "2026-03-04T12:03:19.163Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "胡楚昊",
+      "url": "https://wlmt666.top/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="../../../../img/favicon.png"><link rel="canonical" href="https://wlmt666.top/2026/03/04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="../../../../css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'wasm逆向初探',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/modify.css"><link rel="stylesheet" href="/css/wlmt666.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="../img/butterfly-icon.png" onerror="this.onerror=null;this.src='../img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="../archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="../categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../about"><i class="fa-fw fa fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="../archives"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="../../../../index.html"><span class="site-name">wlmt666的博客</span></a><a class="nav-page-title" href="../../../../index.html"><span class="site-name">wasm逆向初探</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../about"><i class="fa-fw fa fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="../archives"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">wasm逆向初探</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-04T09:14:24.000Z" title="发表于 2026-03-04 17:14:24">2026-03-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-04T12:03:19.163Z" title="更新于 2026-03-04 20:03:19">2026-03-04</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>refer：</p>
+<p><a target="_blank" rel="noopener" href="https://wsxk.github.io/wasm_re/">https://wsxk.github.io/wasm_re/</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/12917#toc-1">https://xz.aliyun.com/news/12917#toc-1</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/13187">https://xz.aliyun.com/news/13187</a></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>前些日子打吾爱破解红包赛事，了解到还有wasm这个号称”运行在浏览器上的汇编“的类似于asm的汇编语言。</p>
+<p>它的开发教程可以见这个文章：<a target="_blank" rel="noopener" href="https://www.wasm.com.cn/getting-started/developers-guide/">https://www.wasm.com.cn/getting-started/developers-guide/</a></p>
+<p>大概了解一下，就是使用官方开发环境。编写一个C代码，转为html，其中就有wasm代码。</p>
+<h1 id="开发环境搭建"><a href="#开发环境搭建" class="headerlink" title="开发环境搭建"></a>开发环境搭建</h1><h2 id="方案1"><a href="#方案1" class="headerlink" title="方案1"></a>方案1</h2><p>首先按照上面文章说的，我们先安装sdk环境</p>
+<p><img src="image-20260304172319373.png" alt="image-20260304172319373"></p>
+<p>如果发生这种情况，说明教程给的太老了，改用下列方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> emsdk</span><br><span class="line"><span class="comment"># 下载并安装最新版本</span></span><br><span class="line">./emsdk install latest</span><br><span class="line"><span class="comment"># 激活该版本</span></span><br><span class="line">./emsdk activate latest</span><br><span class="line"><span class="comment"># 应用环境变量</span></span><br><span class="line"><span class="built_in">source</span> ./emsdk_env.sh</span><br></pre></td></tr></table></figure>
+
+<p>出来后，我们就得到一个html文件，一个js文件和一个wasm文件</p>
+<p>此方法弄出来的是一个类似于控制台的程序，我只是了解wasm正向开发，不多介绍了，我也不太懂，有高手的话可以友好交流一下</p>
+<h2 id="方案2"><a href="#方案2" class="headerlink" title="方案2"></a>方案2</h2><p>这个方案我没有尝试过，也是一款工具，各位可以自行查看一下：<br><a target="_blank" rel="noopener" href="https://www.assemblyscript.org/introduction.html#from-a-webassembly-perspective">https://www.assemblyscript.org/introduction.html#from-a-webassembly-perspective</a></p>
+<p>还有很多可以开发wasm的工具，就不再一一赘述了。</p>
+<h1 id="逆向方式"><a href="#逆向方式" class="headerlink" title="逆向方式"></a>逆向方式</h1><h2 id="静态分析"><a href="#静态分析" class="headerlink" title="静态分析"></a>静态分析</h2><h3 id="1-ghidra"><a href="#1-ghidra" class="headerlink" title="1.ghidra"></a>1.ghidra</h3><p>安装这个扩展：<a target="_blank" rel="noopener" href="https://github.com/nneonneo/ghidra-wasm-plugin">nneonneo&#x2F;ghidra-wasm-plugin: Ghidra Wasm plugin with disassembly and decompilation support</a></p>
+<p><img src="image-20260304175851026.png" alt="image-20260304175851026"></p>
+<p>可以看到基本上能看到大概逻辑，但是还不尽如人意。但是能够分析就是强强工具了</p>
+<h3 id="2-ida"><a href="#2-ida" class="headerlink" title="2.ida"></a>2.ida</h3><p>使用此项目：<a target="_blank" rel="noopener" href="https://github.com/WebAssembly/wabt">WebAssembly&#x2F;wabt: The WebAssembly Binary Toolkit</a></p>
+<p>这个项目也可以转化为wat文件，但是一般转为c再调用ida会省事一点</p>
+<p>直接用ida分析是走不通的</p>
+<p>我们需要先用工具将其转化为c，再连接出o文件</p>
+<p>先输入命令：<code>wasm2c.exe F:\Desktop\ntgl33HW\1.wasm -o test.c</code></p>
+<p>这里编译的步骤很多人会报错，归期原因无非是库文件或者头文件缺失，制定好参数即可</p>
+<p>有时候不指定<code>-I</code>参数（大写i）头文件和<code>-L</code>库文件，就会报错，因此这里直接贴出我运行成功的命令在下面：</p>
+<p><code>gcc -c test.c -o 1.o -I ../include -I ../share/wabt/wasm2c -L ../lib</code></p>
+<p>此命令运行在bin文件夹下，其目录结构是bin和include、share、lib等同级</p>
+<p><img src="image-20260304193735775.png" alt="image-20260304193735775"></p>
+<p>看着顺眼多了</p>
+<h3 id="3-浏览器"><a href="#3-浏览器" class="headerlink" title="3.浏览器"></a>3.浏览器</h3><p>浏览器可以F12，点击源代码，看wasm代码</p>
+<p><img src="image-20260304200301028.png" alt="image-20260304200301028"></p>
+<p>右键save，即可发给AI美美摸鱼</p>
+<h2 id="动态调试"><a href="#动态调试" class="headerlink" title="动态调试"></a>动态调试</h2><p>部分参考：<a target="_blank" rel="noopener" href="https://www.52pojie.cn/thread-2091966-1-1.html#54810066_%E8%A7%A3%E9%A2%98%E9%A2%86%E7%BA%A2%E5%8C%85%E4%B9%8B%E4%B9%9D-{web-%E4%B8%AD%E7%BA%A7%E9%A2%98}">吾爱破解2026红包题WriteUP（除高级） - 吾爱破解 - 52pojie.cn</a></p>
+<p>此方法也是一个NB方法，因为WASM号称浏览器的汇编，浏览器肯定可以执行，那这样的话就跟js没什么两样，我们可以进行调试分析了</p>
+<p><img src="image-20260304194626183.png" alt="image-20260304194626183"></p>
+<p>这就是和调试js一样。浏览器也能直接看到wasm文件</p>
+<p><img src="image-20260304195301443.png" alt="image-20260304195301443"></p>
+<p>我们可以任意下断点，右边能展示出每个变量的值</p>
+<p>由于我们有时候提取数据不是按照某个变量来的，因此部分情况有必要写封装脚本</p>
+<p>就拿这次吾爱破解红包题来说，就可以用动调做题</p>
+<p>比如这里，我们就得写脚本提取值出来，右键memory储存为全局变量，输入以下脚本</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> mem = <span class="keyword">new</span> <span class="title class_">Uint8Array</span>(temp1.<span class="property">buffer</span>);</span><br><span class="line"><span class="keyword">const</span> m32 = <span class="keyword">new</span> <span class="title class_">Uint32Array</span>(temp1.<span class="property">buffer</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> d = <span class="number">1047920</span>; <span class="comment">// 改成当前断点里 $var3</span></span><br><span class="line"><span class="keyword">const</span> ptr = m32[(d + <span class="number">524</span>) &gt;&gt; <span class="number">2</span>];</span><br><span class="line"><span class="keyword">const</span> len = m32[(d + <span class="number">528</span>) &gt;&gt; <span class="number">2</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> bytes = mem.<span class="title function_">subarray</span>(ptr, ptr + len);</span><br><span class="line"><span class="keyword">const</span> text = <span class="keyword">new</span> <span class="title class_">TextDecoder</span>().<span class="title function_">decode</span>(bytes);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(&#123;ptr, len, text&#125;);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;flag =&quot;</span>, <span class="string">`flag&#123;<span class="subst">$&#123;text&#125;</span>&#125;`</span>);</span><br></pre></td></tr></table></figure>
+
+<p>然后我们断点断在合适的位置，每次输出一个数字出来我们就用这个脚本运行一次把那个值打出来</p>
+<p><img src="image-20260304200149499.png" alt="image-20260304200149499"></p>
+<p>这样就得到了flag，而不用我们特别关注解密等的算法具体实现</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://wlmt666.top">胡楚昊</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://wlmt666.top/2026/03/04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/">https://wlmt666.top/2026/03/04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://wlmt666.top" target="_blank">wlmt666的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="../../../../tags/re/">re</a><a class="post-meta__tags" href="../../../../tags/wasm/">wasm</a></div><div class="post-share"><div class="social-share" data-image="../../../../img/butterfly-icon.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="../../../02/23/2026%E5%90%BE%E7%88%B1%E7%A0%B4%E8%A7%A3%E6%96%B0%E6%98%A5%E7%BA%A2%E5%8C%85%E9%A2%98-WP/" title="2026吾爱破解新春红包题 WP"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">2026吾爱破解新春红包题 WP</div></div><div class="info-2"><div class="info-item-1">1313 安卓中等题是真的不会，用到了unidgb，这个技术我还没有接触过，超纲了！！！ MCP这个题之前从来没有见过， 比赛的时候也刚好没有写 然后从七开始的题目就是复现了，实在是不会写啊啊啊 送分题关注公众号发送口令即得到  【春节】解题领红包之二 {Windows 初级题}看字符串发现许多敏感字符串  主函数分析，有校验长度的函数，以及大量输出 主要关注以下函数： 1234567891011121314151617181920_BYTE *__cdecl init_block(int a1)&#123;  _BYTE *result; // eax  *a1 = 758280311;  *(a1 + 4) = 1663511336;  *(a1 + 8) = 1880974179;  *(a1 + 12) = 494170226;  *(a1 + 16) = 842146570;  *(a1 + 20) = 657202491;  *(a1 + 24) = 658185525;  *(a1 + 30) = 99;  *(a1 + 28) = 12323;  result...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="../img/butterfly-icon.png" onerror="this.onerror=null;this.src='../img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">胡楚昊</div><div class="author-info-description">热爱网安的菜鸟一枚</div><div class="site-data"><a href="../archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="../categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/wlmt666"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">热爱网安的菜鸟一枚</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-number">2.</span> <span class="toc-text">开发环境搭建</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%881"><span class="toc-number">2.1.</span> <span class="toc-text">方案1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%A1%882"><span class="toc-number">2.2.</span> <span class="toc-text">方案2</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%80%86%E5%90%91%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">逆向方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90"><span class="toc-number">3.1.</span> <span class="toc-text">静态分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-ghidra"><span class="toc-number">3.1.1.</span> <span class="toc-text">1.ghidra</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-ida"><span class="toc-number">3.1.2.</span> <span class="toc-text">2.ida</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%B5%8F%E8%A7%88%E5%99%A8"><span class="toc-number">3.1.3.</span> <span class="toc-text">3.浏览器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95"><span class="toc-number">3.2.</span> <span class="toc-text">动态调试</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/" title="wasm逆向初探">wasm逆向初探</a><time datetime="2026-03-04T09:14:24.000Z" title="发表于 2026-03-04 17:14:24">2026-03-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/02/23/2026%E5%90%BE%E7%88%B1%E7%A0%B4%E8%A7%A3%E6%96%B0%E6%98%A5%E7%BA%A2%E5%8C%85%E9%A2%98-WP/" title="2026吾爱破解新春红包题 WP">2026吾爱破解新春红包题 WP</a><time datetime="2026-02-23T04:27:28.000Z" title="发表于 2026-02-23 12:27:28">2026-02-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/02/12/frida-labs%E9%80%9A%E5%85%B3%E7%AC%94%E8%AE%B0/" title="frida-labs通关笔记">frida-labs通关笔记</a><time datetime="2026-02-12T08:47:45.000Z" title="发表于 2026-02-12 16:47:45">2026-02-12</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/01/30/2025%E6%98%A5%E7%A7%8B%E6%9D%AF%E5%86%AC%E5%AD%A3%E8%B5%9Bwriteup/" title="2025春秋杯冬季赛writeup">2025春秋杯冬季赛writeup</a><time datetime="2026-01-30T02:37:37.000Z" title="发表于 2026-01-30 10:37:37">2026-01-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2025/12/23/%E5%8D%8E%E4%B8%BA%E9%B8%BF%E8%92%99%E5%BC%80%E5%8F%91%E5%AD%A6%E4%B9%A0/" title="华为鸿蒙开发学习">华为鸿蒙开发学习</a><time datetime="2025-12-23T13:47:55.000Z" title="发表于 2025-12-23 21:47:55">2025-12-23</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent;"><div id="footer-wrap"><div class="copyright">&copy;2025 - 2026 By 胡楚昊</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="../../../../js/utils.js"></script><script src="../../../../js/main.js"></script><div class="js-pjax"></div><script type="text/javascript" src="/js/wlmt666.js"></script><script type="text/javascript" src="/js/sakura.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
