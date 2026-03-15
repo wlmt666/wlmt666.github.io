@@ -1,0 +1,380 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>polar IOT安全 简单难度 | wlmt666的博客</title><meta name="author" content="胡楚昊"><meta name="copyright" content="胡楚昊"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="a few参考的是：PolarD&amp;N PIoTS 简单 - v1c0 - 博客园 bluetooth test 小游家里的智能灯泡家具总是在自己没有控制的时候开开关关，他怀疑是有人控制自己的灯泡进行重放。现在我们获得了一个控制灯泡重放的蓝牙hcl文件，请使用FrontLine11工具找出控制关闭灯泡指令的第一组data文件，将其进行md5加密。工具版本：CPAS-11(Frontline_">
+<meta property="og:type" content="article">
+<meta property="og:title" content="polar IOT安全 简单难度">
+<meta property="og:url" content="https://wlmt666.top/2026/03/08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/index.html">
+<meta property="og:site_name" content="wlmt666的博客">
+<meta property="og:description" content="a few参考的是：PolarD&amp;N PIoTS 简单 - v1c0 - 博客园 bluetooth test 小游家里的智能灯泡家具总是在自己没有控制的时候开开关关，他怀疑是有人控制自己的灯泡进行重放。现在我们获得了一个控制灯泡重放的蓝牙hcl文件，请使用FrontLine11工具找出控制关闭灯泡指令的第一组data文件，将其进行md5加密。工具版本：CPAS-11(Frontline_">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wlmt666.top/img/butterfly-icon.png">
+<meta property="article:published_time" content="2026-03-08T09:58:57.000Z">
+<meta property="article:modified_time" content="2026-03-15T04:32:12.796Z">
+<meta property="article:author" content="胡楚昊">
+<meta property="article:tag" content="ctf">
+<meta property="article:tag" content="iot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wlmt666.top/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "polar IOT安全 简单难度",
+  "url": "https://wlmt666.top/2026/03/08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/",
+  "image": "https://wlmt666.top/img/butterfly-icon.png",
+  "datePublished": "2026-03-08T09:58:57.000Z",
+  "dateModified": "2026-03-15T04:32:12.796Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "胡楚昊",
+      "url": "https://wlmt666.top/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="../../../../img/favicon.png"><link rel="canonical" href="https://wlmt666.top/2026/03/08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="../../../../css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'polar IOT安全 简单难度',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/modify.css"><link rel="stylesheet" href="/css/wlmt666.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="../img/butterfly-icon.png" onerror="this.onerror=null;this.src='../img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="../archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="../categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../about"><i class="fa-fw fa fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="../archives"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="../../../../index.html"><span class="site-name">wlmt666的博客</span></a><a class="nav-page-title" href="../../../../index.html"><span class="site-name">polar IOT安全 简单难度</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../about"><i class="fa-fw fa fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="../archives"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">polar IOT安全 简单难度</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-08T09:58:57.000Z" title="发表于 2026-03-08 17:58:57">2026-03-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-15T04:32:12.796Z" title="更新于 2026-03-15 12:32:12">2026-03-15</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>a few参考的是：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/v1c0/p/19115274">PolarD&amp;N PIoTS 简单 - v1c0 - 博客园</a></p>
+<h2 id="bluetooth-test"><a href="#bluetooth-test" class="headerlink" title="bluetooth test"></a>bluetooth test</h2><blockquote>
+<p>小游家里的智能灯泡家具总是在自己没有控制的时候开开关关，他怀疑是有人控制自己的灯泡进行重放。<br>现在我们获得了一个控制灯泡重放的蓝牙hcl文件，请使用FrontLine11工具找出控制关闭灯泡指令的第一组data文件，将其进行md5加密。<br>工具版本：CPAS-11(Frontline_16.10.12321.12610).exe</p>
+</blockquote>
+<p>这里尝试用wireshark做，解析不出，所以使用题目推荐的工具做</p>
+<p>打开log文件，可以看到解析的非常详细</p>
+<p><img src="image-20260311144924628.png" alt="image-20260311144924628"></p>
+<p>我们着重观看command指令，右键type栏，选择过滤即可过滤出只含command的栏目。我们观看size，一般来说size不会太大，但是前面有的四五个大小的应该不是，这里着重先看看十几的</p>
+<p>询问AI得知：</p>
+<blockquote>
+<p>控制指令的核心逻辑是固定的（比如 “关灯” 就是固定的二进制模板）。为了防止重放攻击（恶意重复发送旧指令），协议里会加一个<strong>自增计数器 &#x2F; 序列号</strong>，每次操作 + 1。</p>
+</blockquote>
+<p>因此我们着重看size相同部分的data段的数据</p>
+<p>经过观察，size&#x3D;15和size&#x3D;22的段很可疑。按照逻辑来说，也是先开灯再关灯吧，而且14内容更小，数据长度更短，且包含 <code>ee fd</code>（这通常是厂商的 Manufacturer ID，即设备标识码），属于<strong>建立连接或配置基础状态</strong>的指令，对应开灯操作。</p>
+<p>因此我们找到第一个size&#x3D;22的地方就行了</p>
+<p>这里找到的内容和wp都一样，但是md5值不同，因此知道怎么做的就好了</p>
+<h2 id="zigbee恶意设备隐蔽通信分析"><a href="#zigbee恶意设备隐蔽通信分析" class="headerlink" title="zigbee恶意设备隐蔽通信分析"></a>zigbee恶意设备隐蔽通信分析</h2><blockquote>
+<p>我们监测到某智能家居 ZigBee 网络中混入了一个未授权的恶意设备，该设备伪装成温湿度传感器，通过隐蔽信道传输数据。请分析捕获的流量包（zigbee_ctf.pcap），完成以下任务：</p>
+<p>1.识别恶意设备：找出异常设备的源地址。</p>
+<p>2.提取隐蔽数据：从恶意设备的通信中提取隐藏的 flag。</p>
+<p>3.组合 flag：按数据包顺序拼接字符，格式为 flag{…}。</p>
+<p>查找源地址为0xbeef的设备</p>
+<p>数据包结构:<code> [帧控制][PAN ID][源地址][目标地址][数据标识][数据]</code></p>
+<p>正常温度数据范围: 20-30</p>
+<p>flag字符按数据包顺序排列</p>
+<p>数据包结构:# 0-1字节: 帧控制 (0x0800 表示标准数据帧)# 2-3字节: PAN ID (小端序)# 4-5字节: 源地址 (小端序)# 6-7字节: 目标地址# 8-9字节: 数据标识 + 数据</p>
+</blockquote>
+<p>背景信息也给我们说的很详细，现在只需要分析数据包即可</p>
+<p>直接点开是一个报错：<br><img src="image-20260311152459452.png" alt="image-20260311152459452"></p>
+<p>这是由于wireshark解析数据包的时候出了问题。</p>
+<p>这道题看官方wp是利用python脚本解析数据包，因为题目已经给了数据包格式了。</p>
+<p>用豆包写一个脚本跑一下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> scapy.<span class="built_in">all</span> <span class="keyword">import</span> rdpcap, Raw</span><br><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">extract_flag</span>(<span class="params">pcap_file=<span class="string">&quot;zigbee_ctf.pcap&quot;</span></span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;[*] 正在加载数据包文件: <span class="subst">&#123;pcap_file&#125;</span> ...&quot;</span>)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        pkts = rdpcap(pcap_file)</span><br><span class="line">    <span class="keyword">except</span> FileNotFoundError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;[-] 错误: 找不到文件 <span class="subst">&#123;pcap_file&#125;</span>，请检查路径。&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    flag_chars = []</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;[*] 开始分析数据包，查找源地址为 0xbeef 的恶意设备...\n&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i, pkt <span class="keyword">in</span> <span class="built_in">enumerate</span>(pkts):</span><br><span class="line">        <span class="keyword">if</span> Raw <span class="keyword">in</span> pkt:</span><br><span class="line">            raw = pkt[Raw].load</span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 确保数据包长度足够提取源地址 (0-5字节)</span></span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(raw) &gt;= <span class="number">6</span>:</span><br><span class="line">                src_addr = struct.unpack(<span class="string">&#x27;&lt;H&#x27;</span>, raw[<span class="number">4</span>:<span class="number">6</span>])[<span class="number">0</span>]</span><br><span class="line">                </span><br><span class="line">                <span class="comment"># 当匹配到恶意设备时，先打印原始数据分析！</span></span><br><span class="line">                <span class="keyword">if</span> src_addr == <span class="number">0xbeef</span>:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">f&quot;\n[+] 发现目标数据包 #<span class="subst">&#123;i&#125;</span>&quot;</span>)</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">f&quot;    -&gt; 源地址: 0x<span class="subst">&#123;src_addr:04x&#125;</span>&quot;</span>)</span><br><span class="line">                    <span class="comment"># 大胆假设，小心求证：先打印出整个负载的 Hex 看看结构</span></span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">f&quot;    -&gt; 原始负载 (Hex): <span class="subst">&#123;raw.<span class="built_in">hex</span>()&#125;</span>&quot;</span>)</span><br><span class="line">                    </span><br><span class="line">                    <span class="comment"># 确保数据包长度足够提取数据</span></span><br><span class="line">                    <span class="keyword">if</span> <span class="built_in">len</span>(raw) &gt;= <span class="number">9</span>:</span><br><span class="line">                        <span class="comment"># 官方 WP 用的是 raw[-1]，结合打印出的 hex 我们可以验证这是否正确</span></span><br><span class="line">                        flag_byte = raw[-<span class="number">1</span>] </span><br><span class="line">                        char = <span class="built_in">chr</span>(flag_byte)</span><br><span class="line">                        flag_chars.append(char)</span><br><span class="line">                        </span><br><span class="line">                        <span class="built_in">print</span>(<span class="string">f&quot;    -&gt; 提取末尾字节: Hex <span class="subst">&#123;<span class="built_in">hex</span>(flag_byte)&#125;</span> -&gt; 字符 &#x27;<span class="subst">&#123;char&#125;</span>&#x27;&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> flag_chars:</span><br><span class="line">        flag_content = <span class="string">&quot;&quot;</span>.join(flag_chars)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\n[================ 分析完毕 ================]&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> flag_content.startswith(<span class="string">&quot;flag&#123;&quot;</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;[+] 最终获取的 Flag: <span class="subst">&#123;flag_content&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;[+] 最终获取的 Flag: flag&#123;&#123;<span class="subst">&#123;flag_content&#125;</span>&#125;&#125;&quot;</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\n[-] 分析完毕，未提取到任何数据。&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    extract_flag(<span class="string">&quot;zigbee_ctf.pcap&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>flag：<code>flag&#123;afwu241nnak31b&#125;</code></p>
+<h2 id="默认密钥漏洞"><a href="#默认密钥漏洞" class="headerlink" title="默认密钥漏洞"></a>默认密钥漏洞</h2><p>题目只给了一个流量包，我们打开进行分析</p>
+<p>wireshark打开还是识别错误，看来只能利用python脚本分析。</p>
+<p>从wp知道了这是此协议的默认出场密钥没有更换导致的可解析的漏洞，问了AI这个密钥一般就是<code>ZigBeeAlliance09</code></p>
+<p>看了WP知道加密是异或，但是gpt给我跑的是AES加密。感觉还是需要更多提示才行</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> scapy.<span class="built_in">all</span> <span class="keyword">import</span> rdpcap, Raw</span><br><span class="line"></span><br><span class="line"><span class="comment"># Zigbee Alliance 默认密钥</span></span><br><span class="line">DEFAULT_KEY = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;5A6967426565416C6C69616E63653039&quot;</span>)</span><br><span class="line">PCAP_FILE = <span class="string">&quot;zigbee_traffic.pcap&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">xor_decrypt</span>(<span class="params">data: <span class="built_in">bytes</span>, key: <span class="built_in">bytes</span></span>) -&gt; <span class="built_in">bytes</span>:</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">bytes</span>(b ^ key[i % <span class="built_in">len</span>(key)] <span class="keyword">for</span> i, b <span class="keyword">in</span> <span class="built_in">enumerate</span>(data))</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    packets = rdpcap(PCAP_FILE)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> packets:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;[-] pcap 为空&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    packet = packets[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> Raw <span class="keyword">not</span> <span class="keyword">in</span> packet:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;[-] 数据包中没有 Raw 载荷&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(packet.show())</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    encrypted_payload = packet[Raw].load</span><br><span class="line">    decrypted = xor_decrypt(encrypted_payload, DEFAULT_KEY)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;[*] Encrypted payload (hex):&quot;</span>, encrypted_payload.<span class="built_in">hex</span>())</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;[*] Key (ascii):&quot;</span>, DEFAULT_KEY.decode())</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;[*] Key (hex):&quot;</span>, DEFAULT_KEY.<span class="built_in">hex</span>())</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;[+] Decrypted payload (hex):&quot;</span>, decrypted.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;[+] Decrypted text:&quot;</span>, decrypted.decode())</span><br><span class="line">    <span class="keyword">except</span> UnicodeDecodeError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;[!] 明文不是合法 UTF-8：&quot;</span>, decrypted)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="OTA升级的文件"><a href="#OTA升级的文件" class="headerlink" title="OTA升级的文件"></a>OTA升级的文件</h2><blockquote>
+<p>有个用于OTA升级的文件，其中包含图像序列号信息，把其用md5加密 即可得到flag{}。</p>
+</blockquote>
+<p>有一个bin文件，首选binwalk进行分析</p>
+<p><img src="image-20260311155700001.png" alt="image-20260311155700001"></p>
+<p>里面存在一个ubi文件，这里选择使用<a target="_blank" rel="noopener" href="https://github.com/onekey-sec/ubi_reader%E8%BF%9B%E8%A1%8C%E6%8F%90%E5%8F%96">https://github.com/onekey-sec/ubi_reader进行提取</a></p>
+<p><img src="image-20260311161220985.png" alt="image-20260311161220985"></p>
+<h2 id="lanya"><a href="#lanya" class="headerlink" title="lanya"></a>lanya</h2><p>看提示就知道是蓝牙分析了，提示说写入了某value</p>
+<p>Peripheral_0x219a264b是从设备（看英语也知道）</p>
+<p>因此过滤此source</p>
+<p>先搜一下value看看</p>
+<p><img src="image-20260311153838767.png" alt="image-20260311153838767"></p>
+<p>这是最后一条，一般都是看最晚的，复制下来md5加密即可</p>
+<h2 id="NFC水卡"><a href="#NFC水卡" class="headerlink" title="NFC水卡"></a>NFC水卡</h2><blockquote>
+<p>有两张NFC卡，其中第2张卡的金额需要转到第1张卡中（金额相加），转入后1卡其校验位和总金额所在扇区的内容经md5（32位大写）加密为flag{}。</p>
+</blockquote>
+<p>对于NFC的分析，看WP也是找ai分析</p>
+<p>关于其扇区数据可以查看此大佬博客：<code>https://blog.csdn.net/hiwoshixiaoyu/article/details/104048663</code></p>
+<p>对比两张卡的数据，可以发现金额信息存储在 <strong>2扇区</strong> 的第0块和第2块：</p>
+<p>- </p>
+<p>  <strong>卡1 (1.txt)</strong> 2扇区第0块：<code>00 00 00 00 00 00 00 00 00 FF FA 87 00 05 78 FD</code> </p>
+<p>- </p>
+<p>  <strong>卡2 (2.txt)</strong> 2扇区第0块：<code>00 00 00 00 00 00 00 00 00 FF FB AC 00 04 53 FD</code> </p>
+<p>通过分析该数据块的结构，可以得出以下规律：</p>
+<p>- </p>
+<p>  <strong>金额数据</strong>：第12-14字节为金额的十六进制表示。卡1为 <code>00 05 78</code> ，卡2为 <code>00 04 53</code> 。</p>
+<p>- </p>
+<p>  <strong>金额取反（Inverse）</strong>：第9-11字节为金额数据的按位取反。例如卡1中，<code>FF FA 87</code> 是 <code>00 05 78</code> 的精确取反值 。</p>
+<ul>
+<li><strong>校验位</strong>：第15字节（最后一个字节）为校验位。该字节是前面0-14字节的累加和对 256 取模的值。因为 3 字节金额与其 3 字节取反值相加恒为 0xFFFFFF，所以这 6 个字节累加和恒等于 0x02FD，再加上前面的全 0 字节，总和永远是 0x02FD。因此，无论金额如何变化，最后一位的校验位恒为 <code>FD</code>。</li>
+</ul>
+<p>将两张卡的金额进行相加：</p>
+<ul>
+<li><strong>卡1金额</strong>：0x0578（十进制 1400）</li>
+<li><strong>卡2金额</strong>：0x0453（十进制 1107）</li>
+<li><strong>总金额</strong>：1400 + 1107 &#x3D; 2507，转为十六进制为 <strong>0x09CB</strong>。</li>
+</ul>
+<p>根据新金额生成对应的写入数据：</p>
+<ul>
+<li><strong>新金额字节</strong>：<code>00 09 CB</code></li>
+<li><strong>新金额取反</strong>：<code>FF F6 34</code></li>
+<li><strong>新校验位</strong>：保持 <code>FD</code> 不变。</li>
+</ul>
+<p>根据上述计算结果更新卡1的 2扇区。第1块的计数器和第3块的密钥控制块保持不变 。转入后卡1的完整 2扇区内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">00 00 00 00 00 00 00 00 00 FF F6 34 00 09 CB FD</span><br><span class="line">58 00 00 01 00 00 00 00 00 00 00 00 00 00 00 59</span><br><span class="line">00 00 00 00 00 00 00 00 00 FF F6 34 00 09 CB FD</span><br><span class="line">12 63 22 33 53 13 FF 07 80 69 12 63 22 33 53 13</span><br></pre></td></tr></table></figure>
+
+<p>将该扇区内容提取为连续的十六进制大写字符串，即为你需要进行 MD5 加密的明文内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">000000000000000000FFF6340009CBFD58000001000000000000000000000059000000000000000000FFF6340009CBFD126322335313FF078069126322335313</span><br></pre></td></tr></table></figure>
+
+<p>不太清楚题目加密的原md5是什么，是<code>flag&#123;46FEED7D708C39B9C843768F0559F1C0&#125;</code></p>
+<h2 id="HCI-Log-Analysis"><a href="#HCI-Log-Analysis" class="headerlink" title="HCI_Log_Analysis"></a>HCI_Log_Analysis</h2><blockquote>
+<p>主机曾通过信息查询命令获得了蓝牙控制器的蓝牙地址，结合日志找到蓝牙控制器的蓝牙地址。（将获得的标准MAC地址进行MD5加密得到flag）<br>主机启动后，通常会发送 HCI_Reset、HCI_Read_BD_ADDR 等命令来获取控制器信息。</p>
+</blockquote>
+<p>使用wireshark打开，过滤此信息。回来的就是信息，wireshark分组详情还能看到里面有个“xiaomi”</p>
+<p><img src="image-20260311154747855.png" alt="image-20260311154747855"></p>
+<p>出来的地址是d8-ce-3a-74-b6-8f，得用短横杠连接</p>
+<h2 id="无线追踪"><a href="#无线追踪" class="headerlink" title="无线追踪"></a>无线追踪</h2><blockquote>
+<p>小游发现隔壁邻居的行踪很是诡异，怀疑他们有不法的目的，就想用自己的力量去找寻线索，确定后再移交给警方。经过几天的观察，发现邻居家的WIFI是最容易发现线索的地方，于是小游就要通过暴力破解的方式破解密码。目前仅知道密码是邻居家某个人的生日，请你想办法帮助小游破解WIFI密码。工具版本：Elcomsoft Wireless Security Audito7.12.538</p>
+</blockquote>
+<p>破解wifi密码的题目，其实可以用Kali自带的工具</p>
+<p><img src="image-20260311151850045.png" alt="image-20260311151850045"></p>
+<p>题目所提供的则是windows的工具，使用方法也比较简单。只需要导入即可，效果如下：速度也是不慢<br><img src="image-20260311152139364.png" alt="image-20260311152139364"></p>
+<h2 id="无线密钥追击4-0"><a href="#无线密钥追击4-0" class="headerlink" title="无线密钥追击4.0"></a>无线密钥追击4.0</h2><blockquote>
+<p>polar智能家居公司的安全团队接到用户投诉：其新部署的“IoT智能婚房网关”存在安全隐患，攻击者可利用漏洞获取家庭Wi-Fi控制权。安全人员取证发现，攻击者成功捕获关键流量包。现提供攻击流量包文件wpa2-01.cap，请找出被劫持的Wi-Fi密码，密码md5加密即为flag。 </p>
+</blockquote>
+<p>在wireshark输入：eapol，这个协议专门是认证用的</p>
+<ul>
+<li><strong>Message 1</strong>: 路由器发送随机数 (ANonce) 给客户端。</li>
+<li><strong>Message 2</strong>: 客户端发送自己的随机数 (SNonce) 和一个 <strong>MIC (消息完整性代码)<strong>。</strong>这就是密码破解工具（如 Aircrack-ng）最感兴趣的包</strong>，因为它包含了验证密码所需的关键线索。</li>
+<li><strong>Message 3</strong>: 路由器发送组临时密钥 (GTK)。</li>
+<li><strong>Message 4</strong>: 客户端确认，握手完成。</li>
+</ul>
+<p><img src="180967d4141d40d094206e9a45bb0f3f.png" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<p>在这题目之中，这只是协商密钥，不能明文看到密钥，我们需要用kali的工具去破解</p>
+<p>这款工具叫做aircrack-ng，我们使用弱口令字典rockyou（kali自带，一般在&#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;<br> ）即可破解。具体命令：aircrack-ng -w &#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;rockyou.txt &#x2F;home&#x2F;kali&#x2F;桌面&#x2F;wpa2-01.cap </p>
+<p>攻击效果下图</p>
+<p><img src="4a41f478eef24a47a88a354c1678276e.png" alt="img"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
+<p>md5一下提交即可</p>
+<h2 id="AESKeyRecovery"><a href="#AESKeyRecovery" class="headerlink" title="AESKeyRecovery"></a>AESKeyRecovery</h2><p>背景信息：</p>
+<blockquote>
+<p>某智能家居厂商推出的智能门锁设备，采用AES-128-CBC算法加密设备与云端的通信数据，以保障开锁指令、用户密码等敏感信息的传输安全。该设备的加密密钥存储在固件中，但为 “隐藏” 密钥，研发人员采用了以下设计：</p>
+<p>1.128 位 AES 密钥拆分为 8 个独立的十六进制字节</p>
+<p>2.每个密钥片段的原始字节经过XOR 异或变换后存储，变换规则为：存储值 &#x3D; 原始密钥片段字节 XOR 0x5A；</p>
+<p>3.变换后的存储值分散在固件的特定偏移地址中，地址规律为：0x1000 + n×0x200（其中 n 为 0~7，即 8 个存储位置）。</p>
+<p>现提供该智能门锁的固件片段文件lock_firmware.bin（可通过题目附件获取），请基于该文件完成密钥提取</p>
+</blockquote>
+<p>用010打开文件也可以，这里我选择用python提取相应字节</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;./lock_firmware.bin&quot;</span>, <span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    b = <span class="built_in">bytearray</span>(f.read())</span><br><span class="line">    aes_key = <span class="string">&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;===== 逐步骤密钥提取（十六进制）=====&quot;</span>)</span><br><span class="line">    <span class="comment"># 遍历8个密钥片段（n=0~7）</span></span><br><span class="line">    <span class="keyword">for</span> n <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">8</span>):</span><br><span class="line">        <span class="comment"># 1. 计算当前偏移地址</span></span><br><span class="line">        offset = <span class="number">0x1000</span> + n * <span class="number">0x200</span></span><br><span class="line">        <span class="comment"># 2. 打印偏移地址（十六进制）</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;\n【片段<span class="subst">&#123;n+<span class="number">1</span>&#125;</span>】&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;  偏移地址: 0x<span class="subst">&#123;offset:04X&#125;</span>&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 读取固件中的字节（十六进制）</span></span><br><span class="line">        <span class="keyword">if</span> offset &gt;= <span class="built_in">len</span>(b):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;  错误：偏移地址超出文件范围，填充0x00&quot;</span>)</span><br><span class="line">            firmware_byte = <span class="number">0x00</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            firmware_byte = b[offset]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;  固件中读取的字节: 0x<span class="subst">&#123;firmware_byte:02X&#125;</span>&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 4. 异或0x5A还原原始字节（十六进制）</span></span><br><span class="line">        original_byte = firmware_byte ^ <span class="number">0x5A</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;  异或0x5A后原始字节: 0x<span class="subst">&#123;original_byte:02X&#125;</span>&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 5. 拼接至最终密钥</span></span><br><span class="line">        aes_key += <span class="string">f&quot;<span class="subst">&#123;original_byte:02X&#125;</span>&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 最终结果输出</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;\n===== 最终结果 =====&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;完整AES密钥（无分隔）: <span class="subst">&#123;aes_key&#125;</span>&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这里怀疑是wp答案给错了，脚本算的是<code>66 BC 3D 52 7F E9 D7 23</code>，但是wp是<code>66B03D527FE9D723</code></p>
+<p>后续：联系了官方，改正过来了flag</p>
+<h2 id="ezzigbee"><a href="#ezzigbee" class="headerlink" title="ezzigbee"></a>ezzigbee</h2><blockquote>
+<p>一位客户报告说他们的Zigbee智能门锁系统被入侵，攻击者可以在非授权状态下开锁。客户提供了一个Zigbee网络通信包捕获文件，其中记录了包含入侵行为的通信数据，你需要分析该抓包文件，找出攻击者留下的flag。</p>
+</blockquote>
+<p>先字节流搜索flag试试，直接出了</p>
+<p><img src="image-20260309195606337.png" alt="image-20260309195606337"></p>
+<blockquote>
+</blockquote>
+<h2 id="miwifi"><a href="#miwifi" class="headerlink" title="miwifi"></a>miwifi</h2><blockquote>
+<p>注意“polarctf”哦，现获得了路由器固件，你需要找到程序的ip和端口</p>
+</blockquote>
+<p>binwalk提取出文件系统，我们搜polar文件</p>
+<p><img src="image-20260312104241852.png" alt="image-20260312104241852"></p>
+<p>可以看到tmp文件夹存在polarctf文件，这正好是二进制分析领域，小试牛刀一下</p>
+<p>程序内编码一串字符串，经过cyberchef解码为ip地址</p>
+<p><img src="image-20260312104455512.png" alt="image-20260312104455512"></p>
+<p>现在就剩下端口了。我们发现这串字符串下面用*拼接了一些字符，最后一个是6</p>
+<p><img src="image-20260312104616899.png" alt="image-20260312104616899"></p>
+<p>main函数是打印操作，最后会打印4次6。我们也可以直接运行就看到了结果，这里就不贴图了</p>
+<h2 id="小明爱跑步"><a href="#小明爱跑步" class="headerlink" title="小明爱跑步"></a>小明爱跑步</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">背景：小明去跑步的路线图</span><br><span class="line">目标：这份 GPX 在地图里会非常“糊”，看不出来任何字母。但有一条规则：发现自己一段特定时间行程轨迹路线构成类似与字母（等差数，如:0 3  5 ...）</span><br><span class="line"></span><br><span class="line">## 你的任务</span><br><span class="line">1. 解析整个 GPX（所有 track/segment/point）。</span><br><span class="line">2. 仅保留 **时间戳秒数为特定时间** 的点。</span><br><span class="line">3. 用保留下来的点生成新 GPX 并在地图软件打开 。</span><br><span class="line"></span><br><span class="line">得到的字母md5加密得到正确flag</span><br><span class="line">网站：https://crypot.51strive.com/md5.html</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>题目给了一个gpx文件</p>
+<p>在线网站打开是杂乱无章的</p>
+<p><img src="image-20260312121028717.png" alt="image-20260312121028717"></p>
+<p>接下来看了wp才有思路，将时间按照奇数偶数分为两个</p>
+<p><img src="image-20260313145917960.png" alt="image-20260313145917960"></p>
+<p>分离出来的得到了IO两个字母，md5一下即可<br>exp：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> gpxpy</span><br><span class="line"><span class="keyword">import</span> gpxpy.gpx</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">split_gpx_by_odd_even_time</span>(<span class="params">gpx_file_path</span>):</span><br><span class="line">    <span class="comment"># 1. 读取并解析GPX文件</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(gpx_file_path, <span class="string">&#x27;r&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        gpx = gpxpy.parse(f)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 准备两个全新的GPX对象</span></span><br><span class="line">    odd_gpx = gpxpy.gpx.GPX()</span><br><span class="line">    even_gpx = gpxpy.gpx.GPX()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 【修复1】安全处理 gpx.name 为 None 的情况</span></span><br><span class="line">    base_name = gpx.name <span class="keyword">if</span> gpx.name <span class="keyword">else</span> <span class="string">&quot;track&quot;</span></span><br><span class="line">    odd_gpx.name = <span class="string">f&quot;<span class="subst">&#123;base_name&#125;</span>_odd&quot;</span></span><br><span class="line">    even_gpx.name = <span class="string">f&quot;<span class="subst">&#123;base_name&#125;</span>_even&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 使用 creator 属性更符合 GPX 的标准规范</span></span><br><span class="line">    odd_gpx.creator = gpx.creator</span><br><span class="line">    even_gpx.creator = gpx.creator</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 如果你想保留作者名字，可以安全地用 getattr 获取</span></span><br><span class="line">    odd_gpx.author_name = <span class="built_in">getattr</span>(gpx, <span class="string">&#x27;author_name&#x27;</span>, <span class="literal">None</span>)</span><br><span class="line">    even_gpx.author_name = <span class="built_in">getattr</span>(gpx, <span class="string">&#x27;author_name&#x27;</span>, <span class="literal">None</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 3. 【修复2】遍历并保留原文件结构（Tracks -&gt; Segments -&gt; Points）</span></span><br><span class="line">    <span class="keyword">for</span> track <span class="keyword">in</span> gpx.tracks:</span><br><span class="line">        new_odd_track = gpxpy.gpx.GPXTrack()</span><br><span class="line">        new_even_track = gpxpy.gpx.GPXTrack()</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> segment <span class="keyword">in</span> track.segments:</span><br><span class="line">            new_odd_segment = gpxpy.gpx.GPXTrackSegment()</span><br><span class="line">            new_even_segment = gpxpy.gpx.GPXTrackSegment()</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">for</span> point <span class="keyword">in</span> segment.points:</span><br><span class="line">                <span class="keyword">if</span> point.time:</span><br><span class="line">                    <span class="comment"># 【修复3】按照真实时间戳的值来判定奇偶</span></span><br><span class="line">                    <span class="comment"># timestamp() 将 datetime 转换为秒级时间戳，再对2取余</span></span><br><span class="line">                    timestamp_seconds = <span class="built_in">int</span>(point.time.timestamp())</span><br><span class="line">                    </span><br><span class="line">                    <span class="keyword">if</span> timestamp_seconds % <span class="number">2</span> != <span class="number">0</span>:</span><br><span class="line">                        new_odd_segment.points.append(point)</span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        new_even_segment.points.append(point)</span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 如果分段内有数据，才把 Segment 保留到 Track 中</span></span><br><span class="line">            <span class="keyword">if</span> new_odd_segment.points:</span><br><span class="line">                new_odd_track.segments.append(new_odd_segment)</span><br><span class="line">            <span class="keyword">if</span> new_even_segment.points:</span><br><span class="line">                new_even_track.segments.append(new_even_segment)</span><br><span class="line">                </span><br><span class="line">        <span class="comment"># 如果轨迹内有数据，才把 Track 保留到 GPX 中</span></span><br><span class="line">        <span class="keyword">if</span> new_odd_track.segments:</span><br><span class="line">            odd_gpx.tracks.append(new_odd_track)</span><br><span class="line">        <span class="keyword">if</span> new_even_track.segments:</span><br><span class="line">            even_gpx.tracks.append(new_even_track)</span><br><span class="line">            </span><br><span class="line">    <span class="comment"># 4. 保存文件</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save_gpx</span>(<span class="params">new_gpx_obj, suffix</span>):</span><br><span class="line">        new_file_path = gpx_file_path.replace(<span class="string">&#x27;.gpx&#x27;</span>, <span class="string">f&#x27;_<span class="subst">&#123;suffix&#125;</span>.gpx&#x27;</span>)</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(new_file_path, <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(new_gpx_obj.to_xml())</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;✅ 已生成 <span class="subst">&#123;suffix&#125;</span> 版GPX文件：<span class="subst">&#123;new_file_path&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    save_gpx(odd_gpx, <span class="string">&quot;odd&quot;</span>)</span><br><span class="line">    save_gpx(even_gpx, <span class="string">&quot;even&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    split_gpx_by_odd_even_time(<span class="string">&quot;sport.gpx&quot;</span>)  <span class="comment"># 替换成实际的GPX文件路径</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="点击挑战"><a href="#点击挑战" class="headerlink" title="点击挑战"></a>点击挑战</h2><blockquote>
+<p>有一个点击挑战的手机游戏，小游非常想通关，请你帮帮他。</p>
+</blockquote>
+<p>这个题目这么像Re呢</p>
+<p><img src="image-20260313144440046.png" alt="image-20260313144440046"></p>
+<p>从这个函数看出这就是RSA</p>
+<p>密钥和密文都已知。</p>
+<p>解密：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">from</span> Crypto.PublicKey <span class="keyword">import</span> RSA</span><br><span class="line"><span class="keyword">from</span> Crypto.Cipher <span class="keyword">import</span> PKCS1_v1_5</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">decrypt_flag</span>():</span><br><span class="line">    <span class="comment"># 游戏提供的 Base64 编码数据</span></span><br><span class="line">    encrypted_flag_base64 = <span class="string">&quot;rVAlPcZC8ioAKKp7fQkTD3aGu+VMZxO15xlDjaRsRqjNiFvM+KZIv1Y6f8YnhKmvPYq7AXuhss/qOhVhnXm0hQkcDjbVBlhZidZZc2lw3PIc1mphUVgj+rd1hu3xwDY8Gsh1CNEx0H878B93T+OVshWh6IygFi6VFHEnfYOh99vPcA6MbeaRFMb4ZhWvr122X0/dxsrP1KXlQEWcnLXtPpbIB7aXjwHb1nqUNaD4EaDqNoouF+CxA4YOt4Oh8sHqh8BtNsD2khSrz6rS5mi7DRff4A4RxRvW4SVU0p7z5v6/KXgdhPe7df9k9duKDUgJ8BooPbMJnG/RuqljK3MR3g==&quot;</span></span><br><span class="line">    </span><br><span class="line">    private_key_base64 = <span class="string">&quot;MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDO4h24vdQdH3Y5M2f0UZzU8ESNiNImvUDSa6KnlrXCQn/iOnfQDK97wnx0LDibNlMAE50AizHGXwlWClBqtMohObbiFgZrpONbw1Xyg6sGVPPjDHpqgZkV7iXpAnQdphkeEkp2YVYWPaAwFj+lIQl9IuyW1uaGqYKcAzI4xd9juzA1h9wZjXSVyAo77q/HbNVgM1RFw0zQuUJ8qV1rAZv1zrkv7bRO4O4EC00fxzcvbOdos8WwjKvBwSWI52oJEQ6rhYk471o9YkE6pWxuWWORnjLmmI/Eb66BrVUwLZSyTxtUWNrMqyOmtNlkH6H9HL3MrnrPLRiu6m2BrsOnPDmrAgMBAAECggEAIyqEata5q4mhiu+WCA2nXvrIbFaJglRBJINvTpVrp+2t10KhAxhk6+CPTyAFLzz4ttaepW0DtPiKmbl/GeRJR4SL9bpQtRN+Iib+AQ8ojxb5rep9FIWbBANLJmRoYHHPazEovx6kh3tKM2JUxzjqZ/77wFgfL1y4+tQAQW5BHq5wsnKgW5/kysZf1tNhBvyNCowJF0JxisoGvx5nx63J+d+TAM0XPpQ8RBVFjoR3W2odWdpeAmbMl1Aa4ZihcskBbp4EqYr1QZYGuONzLBLaqtwu+E+uC0JPU3dxy9te3Yjs33Dd41gcg8v6HnTrNFntsfR9TojLmEL5N8q+DWvKgQKBgQDlxYmlfefj+b5+FOuokJWX3ioYhFxM4OVF2WkTirAcydm+b7Teacmc3YL9xr0If+88trjb7b8BXCwiterpFi0Pax/z5u7ZIJ8BA1MwybC0CIBzy2i0tMU0qCPCaMYkrEHjKBrYmSIXAy3jqyZ4V9QMkO4pcJoEPNCSyBPr3cZVewKBgQDmf7oglk890b0CVdFNYzPN2Du01OZ5y7aJbzKGlo/H+xx8Qkm/eUeaIOPTWemZaJYCHOQHKHMN/Zp50qE/g7OkQifrvHSJR+PgLv+YN/Y0Our2zIiY5wdZRNZj6k6l9eDbsR65lDC3bhwahuYBQ1yvHzSdaRjeMCJ2Agod6z69kQKBgCrlTQQ7VC5ocprBNxmaHINks4EuPLkRh1wZ8Zb3XleRi3gVDLQ1FbGWXR0ZnDLZB4XTKwHMCcusNIUqZzeqrzDgs+9p3o9kmqqqvz4teTKzH5/+ioap9OMWvM5PlyZDjm1lEFX9iLK5IjkNu7nd07Wg3QWZgvdljx7IAYgYOC2/AoGADXeG82J0zMLVTS6gZOoX2733dxA9Sv5o8sypYg2n5uI3/taMooA+e7XSOcX2DP18TjFL7VMirb2UaeuxehmCxGUNGgvPrzmhCbcVPdp/KvwKQFMg4/YTitanw/yrjay4730As40B76WiRLZ+97Hs11p2Y4ABcPHVAZoK50aYStECgYEAxktu0YJ2By/rRPB1kAkttSb6PvEAuIwuwUFmttYiNuO8dQktpLjCoi62eyUzPxHWcY0Hxi92IAqfS697e9skEMKrepRZ6ysAkKjOMaJhVAwA+XAdRhaPimy4miDFa5dSFPxcc0JwfCAXkX2C/jjYc9s7t4jOMDnYhGszlzGdjNU=&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 1. 将 Base64 字符串解码为字节(bytes)</span></span><br><span class="line">        encrypted_data = base64.b64decode(encrypted_flag_base64)</span><br><span class="line">        private_key_der = base64.b64decode(private_key_base64)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 2. 导入 RSA 私钥</span></span><br><span class="line">        <span class="comment"># 游戏里提供的通常是 DER 格式的私钥（由 Base64 编码）</span></span><br><span class="line">        rsa_key = RSA.import_key(private_key_der)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 3. 创建解密器</span></span><br><span class="line">        <span class="comment"># 大多数早期的游戏或标准 Java 加密使用的是 PKCS1_v1_5 填充模式</span></span><br><span class="line">        cipher = PKCS1_v1_5.new(rsa_key)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 4. 执行解密</span></span><br><span class="line">        <span class="comment"># sentinel 设为 None 表示如果解密失败会抛出 ValueError，而不是返回一个假数据</span></span><br><span class="line">        decrypted_data = cipher.decrypt(encrypted_data, sentinel=<span class="literal">None</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 5. 打印通关 Flag</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;🎉 解密成功！通关 Flag 为:&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;-&quot;</span> * <span class="number">30</span>)</span><br><span class="line">        <span class="built_in">print</span>(decrypted_data.decode(<span class="string">&#x27;utf-8&#x27;</span>))</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;-&quot;</span> * <span class="number">30</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">except</span> ValueError <span class="keyword">as</span> e:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;解密失败。可能的原因：填充模式不匹配（例如游戏实际使用的是 OAEP）。&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;错误详情:&quot;</span>, e)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;发生了一个错误:&quot;</span>, e)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    decrypt_flag()</span><br></pre></td></tr></table></figure>
+
+<h2 id="智能家居设备的固件镜像"><a href="#智能家居设备的固件镜像" class="headerlink" title="智能家居设备的固件镜像"></a>智能家居设备的固件镜像</h2><blockquote>
+<p>你获得了一个智能家居设备的固件镜像，该设备用于家庭安防监控。安全研究人员怀疑该固件中存在硬编码的敏感信息。你的任务是提取并分析固件，找到隐藏的flag。</p>
+</blockquote>
+<p>binwalk没有提取成功，打开010</p>
+<p><img src="image-20260315123057324.png" alt="image-20260315123057324"></p>
+<p>这里是一串乱码</p>
+<p><img src="image-20260315123110590.png" alt="image-20260315123110590"></p>
+<p>这里是几个假的flag</p>
+<p>这里有一个提示是异或0x42</p>
+<p><img src="image-20260315123155613.png" alt="image-20260315123155613"></p>
+<p>解密即可</p>
+<p><img src="image-20260315123209784.png" alt="image-20260315123209784"></p>
+<h2 id="智能灯泡固件更新挑战"><a href="#智能灯泡固件更新挑战" class="headerlink" title="智能灯泡固件更新挑战"></a>智能灯泡固件更新挑战</h2><p>题目给了一个py脚本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="comment"># ota_update.py</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">verify_firmware</span>(<span class="params">firmware_data</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;验证固件完整性并解密flag&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 检查固件头</span></span><br><span class="line">    <span class="keyword">if</span> firmware_data[:<span class="number">16</span>] != <span class="string">b&quot;FIRMWARE_HEADER_1.0&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;无效的固件头!&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 提取加密的flag (从偏移量0x60开始)</span></span><br><span class="line">    encrypted_flag = firmware_data[<span class="number">0x60</span>:<span class="number">0x60</span>+<span class="number">16</span>]</span><br><span class="line">    key = <span class="number">0x37</span>  <span class="comment"># XOR密钥</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 解密flag</span></span><br><span class="line">    flag = <span class="string">&#x27;&#x27;</span>.join([<span class="built_in">chr</span>(b ^ key) <span class="keyword">for</span> b <span class="keyword">in</span> encrypted_flag])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> flag.startswith(<span class="string">&quot;flag&#123;&quot;</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;固件验证成功! Flag: <span class="subst">&#123;flag&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;固件验证失败!&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 主更新流程</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">perform_ota_update</span>():</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;开始OTA更新...&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;firmware_encrypted.bin&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            firmware_data = f.read()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> verify_firmware(firmware_data):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;更新成功!&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;更新失败!&quot;</span>)</span><br><span class="line">    <span class="keyword">except</span> FileNotFoundError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;找不到固件文件!&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    perform_ota_update()</span><br></pre></td></tr></table></figure>
+
+<p>这道题很简单， 把校验的片段的代码删除掉即可</p>
+<h2 id="无线电小试牛刀"><a href="#无线电小试牛刀" class="headerlink" title="无线电小试牛刀"></a>无线电小试牛刀</h2><blockquote>
+<p>这两天小游家的门铃总是没来由的响，他怀疑是无线电攻击。现获得了一个无线电重放的文件，请找出暂停时第三次出现的1160samples时的数据码，先通过高低电平确定信号(0和1，不规则的不计入)，再将其MD5加密</p>
+</blockquote>
+<p><img src="image-20260313151850560.png" alt="image-20260313151850560"></p>
+<p>这是题目提示的第三个数据码</p>
+<p><img src="image-20260313152455913.png" alt="image-20260313152455913"></p>
+<p>上图直接抄的大佬的了</p>
+<p>11101110111011101110111010001110100111011101110111010010011101001110111011101001000111010001</p>
+<p><strong>逐组分析：</strong></p>
+<ol>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1000</code> → <strong>0</strong></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1001</code> → <em>(不规则，删除)</em></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1110</code> → <strong>1</strong></li>
+<li><code>1001</code> → <em>(不规则，删除)</em></li>
+<li><code>0011</code> → <em>(不规则，删除)</em> … 后面大部分序列（如 <code>1010</code>, <code>0111</code> 等）均不符合 <code>1110</code> 或 <code>1000</code>，属于噪声或不规则信号。</li>
+</ol>
+<p>按照规则处理后，有效信号为： <strong><code>111111011111</code></strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://wlmt666.top">胡楚昊</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://wlmt666.top/2026/03/08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/">https://wlmt666.top/2026/03/08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://wlmt666.top" target="_blank">wlmt666的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="../../../../tags/ctf/">ctf</a><a class="post-meta__tags" href="../../../../tags/iot/">iot</a></div><div class="post-share"><div class="social-share" data-image="../../../../img/butterfly-icon.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="../../04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/" title="wasm逆向初探"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">wasm逆向初探</div></div><div class="info-2"><div class="info-item-1">refer： https://wsxk.github.io/wasm_re/ https://xz.aliyun.com/news/12917#toc-1 https://xz.aliyun.com/news/13187 前言前些日子打吾爱破解红包赛事，了解到还有wasm这个号称”运行在浏览器上的汇编“的类似于asm的汇编语言。 它的开发教程可以见这个文章：https://www.wasm.com.cn/getting-started/developers-guide/ 大概了解一下，就是使用官方开发环境。编写一个C代码，转为html，其中就有wasm代码。 开发环境搭建方案1首先按照上面文章说的，我们先安装sdk环境  如果发生这种情况，说明教程给的太老了，改用下列方式： 1234567cd emsdk# 下载并安装最新版本./emsdk install latest# 激活该版本./emsdk activate latest# 应用环境变量source...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="../../../02/12/frida-labs%E9%80%9A%E5%85%B3%E7%AC%94%E8%AE%B0/" title="frida-labs通关笔记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-12</div><div class="info-item-2">frida-labs通关笔记</div></div><div class="info-2"><div class="info-item-1">说是打靶场，其实是学习frida 本次所用的靶场是Frida靶场：https://github.com/DERE-ad2001/Frida-Labs/tree/main 前言之前一直说要酷酷学习Frida，结果老是没有搞，真的是看不起自己呀！这次说啥也得写了。本博客完结之前会持续更新，目前我的frida功底也是垃圾的一批，所以只作为记录自己学习的日记使用了。 我看到了这个项目：https://github.com/coffeehb/FridaHook...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="../img/butterfly-icon.png" onerror="this.onerror=null;this.src='../img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">胡楚昊</div><div class="author-info-description">热爱网安的菜鸟一枚</div><div class="site-data"><a href="../archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="../categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/wlmt666"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">热爱网安的菜鸟一枚</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#bluetooth-test"><span class="toc-number">1.</span> <span class="toc-text">bluetooth test</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zigbee%E6%81%B6%E6%84%8F%E8%AE%BE%E5%A4%87%E9%9A%90%E8%94%BD%E9%80%9A%E4%BF%A1%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">zigbee恶意设备隐蔽通信分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E5%AF%86%E9%92%A5%E6%BC%8F%E6%B4%9E"><span class="toc-number">3.</span> <span class="toc-text">默认密钥漏洞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OTA%E5%8D%87%E7%BA%A7%E7%9A%84%E6%96%87%E4%BB%B6"><span class="toc-number">4.</span> <span class="toc-text">OTA升级的文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#lanya"><span class="toc-number">5.</span> <span class="toc-text">lanya</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NFC%E6%B0%B4%E5%8D%A1"><span class="toc-number">6.</span> <span class="toc-text">NFC水卡</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HCI-Log-Analysis"><span class="toc-number">7.</span> <span class="toc-text">HCI_Log_Analysis</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A0%E7%BA%BF%E8%BF%BD%E8%B8%AA"><span class="toc-number">8.</span> <span class="toc-text">无线追踪</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A0%E7%BA%BF%E5%AF%86%E9%92%A5%E8%BF%BD%E5%87%BB4-0"><span class="toc-number">9.</span> <span class="toc-text">无线密钥追击4.0</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AESKeyRecovery"><span class="toc-number">10.</span> <span class="toc-text">AESKeyRecovery</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ezzigbee"><span class="toc-number">11.</span> <span class="toc-text">ezzigbee</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#miwifi"><span class="toc-number">12.</span> <span class="toc-text">miwifi</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E6%98%8E%E7%88%B1%E8%B7%91%E6%AD%A5"><span class="toc-number">13.</span> <span class="toc-text">小明爱跑步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%82%B9%E5%87%BB%E6%8C%91%E6%88%98"><span class="toc-number">14.</span> <span class="toc-text">点击挑战</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%99%BA%E8%83%BD%E5%AE%B6%E5%B1%85%E8%AE%BE%E5%A4%87%E7%9A%84%E5%9B%BA%E4%BB%B6%E9%95%9C%E5%83%8F"><span class="toc-number">15.</span> <span class="toc-text">智能家居设备的固件镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%99%BA%E8%83%BD%E7%81%AF%E6%B3%A1%E5%9B%BA%E4%BB%B6%E6%9B%B4%E6%96%B0%E6%8C%91%E6%88%98"><span class="toc-number">16.</span> <span class="toc-text">智能灯泡固件更新挑战</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A0%E7%BA%BF%E7%94%B5%E5%B0%8F%E8%AF%95%E7%89%9B%E5%88%80"><span class="toc-number">17.</span> <span class="toc-text">无线电小试牛刀</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/" title="polar IOT安全 简单难度">polar IOT安全 简单难度</a><time datetime="2026-03-08T09:58:57.000Z" title="发表于 2026-03-08 17:58:57">2026-03-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/" title="wasm逆向初探">wasm逆向初探</a><time datetime="2026-03-04T09:14:24.000Z" title="发表于 2026-03-04 17:14:24">2026-03-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/02/23/2026%E5%90%BE%E7%88%B1%E7%A0%B4%E8%A7%A3%E6%96%B0%E6%98%A5%E7%BA%A2%E5%8C%85%E9%A2%98-WP/" title="2026吾爱破解新春红包题 WP">2026吾爱破解新春红包题 WP</a><time datetime="2026-02-23T04:27:28.000Z" title="发表于 2026-02-23 12:27:28">2026-02-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/02/12/frida-labs%E9%80%9A%E5%85%B3%E7%AC%94%E8%AE%B0/" title="frida-labs通关笔记">frida-labs通关笔记</a><time datetime="2026-02-12T08:47:45.000Z" title="发表于 2026-02-12 16:47:45">2026-02-12</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/01/30/2025%E6%98%A5%E7%A7%8B%E6%9D%AF%E5%86%AC%E5%AD%A3%E8%B5%9Bwriteup/" title="2025春秋杯冬季赛writeup">2025春秋杯冬季赛writeup</a><time datetime="2026-01-30T02:37:37.000Z" title="发表于 2026-01-30 10:37:37">2026-01-30</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent;"><div id="footer-wrap"><div class="copyright">&copy;2025 - 2026 By 胡楚昊</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="../../../../js/utils.js"></script><script src="../../../../js/main.js"></script><div class="js-pjax"></div><script type="text/javascript" src="/js/wlmt666.js"></script><script type="text/javascript" src="/js/sakura.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
