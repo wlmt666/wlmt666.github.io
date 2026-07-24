@@ -67,3 +67,24 @@ div#archive {
     background: rgba(25, 25, 25, 0.9) !important;
     color: #ffffff;
 }
+/* 修复giscus布局错乱 */
+.giscus {
+  margin-top: 2rem !important;
+  border: none !important;
+  outline: none !important;
+}
+.giscus-frame {
+  border: 0 !important;
+}
+
+/* 评论区上方分隔线 */
+#post > hr.custom-hr {
+    margin: 2rem 0 1.1rem;
+    border: 0;
+    border-top: 1px solid rgba(127, 127, 127, 0.18);
+    width: 100%;
+}
+
+#post > hr.custom-hr::before {
+    display: none !important;
+}
