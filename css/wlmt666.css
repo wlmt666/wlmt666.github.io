@@ -78,13 +78,13 @@ div#archive {
 }
 
 /* 评论区上方分隔线 */
-#post > hr.custom-hr {
+hr.custom-hr {
     margin: 2rem 0 1.1rem;
     border: 0;
     border-top: 1px solid rgba(127, 127, 127, 0.18);
     width: 100%;
 }
 
-#post > hr.custom-hr::before {
+hr.custom-hr::before {
     display: none !important;
 }
