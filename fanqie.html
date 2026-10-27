@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>番茄·随机休息法 · 惊喜专注器</title>
+<style>
+  :root{
+    --bg1:#0f0c29; --bg2:#302b63; --bg3:#24243e;
+    --ink:#f5f0ff; --muted:#a99fd0;
+    --gold:#ffd166; --amber:#ff9f43;
+    --teal:#4dd0e1; --teal2:#1de9b6;
+    --purple:#b388ff; --rose:#ff6b81;
+    --card:rgba(255,255,255,.06);
+    --card-border:rgba(255,255,255,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Segoe UI", "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2) 60%,var(--bg3));
+    color:var(--ink);
+    overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;
+  }
+  /* 漂浮光斑背景 */
+  .orb{position:fixed;border-radius:50%;filter:blur(60px);opacity:.5;pointer-events:none;animation:float 16s ease-in-out infinite}
+  .orb.a{width:34vw;height:34vw;background:radial-gradient(circle,#6a5cff,transparent 70%);top:-12vw;left:-8vw}
+  .orb.b{width:28vw;height:28vw;background:radial-gradient(circle,#ff6b81,transparent 70%);bottom:-10vw;right:-6vw;animation-delay:-5s}
+  .orb.c{width:20vw;height:20vw;background:radial-gradient(circle,#1de9b6,transparent 70%);top:40vh;left:55vw;animation-delay:-9s;opacity:.35}
+  @keyframes float{
+    0%,100%{transform:translate(0,0) scale(1)}
+    50%{transform:translate(4vw,-3vh) scale(1.12)}
+  }
+  /* 顶部粒子星尘 */
+  .stars{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+  .stars i{position:absolute;width:3px;height:3px;background:#fff;border-radius:50%;opacity:0;animation:twinkle 5s linear infinite}
+  @keyframes twinkle{0%{opacity:0}40%{opacity:.9}100%{opacity:0;transform:translateY(40px)}}
+
+  .card{
+    position:relative;z-index:2;
+    width:min(92vw,440px);
+    background:var(--card);
+    border:1px solid var(--card-border);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border-radius:28px;
+    padding:34px 30px 30px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12);
+    text-align:center;
+    animation:rise .8s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+  .logo{font-size:13px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+  h1{font-size:26px;font-weight:800;background:linear-gradient(90deg,var(--gold),var(--rose),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px}
+  .sub{font-size:13px;color:var(--muted);line-height:1.7}
+
+  .setup{margin-top:22px;display:flex;flex-direction:column;gap:14px;align-items:center}
+  .setup label{font-size:13px;color:var(--muted)}
+  .input-row{display:flex;align-items:center;gap:10px}
+  .input-row input{
+    width:130px;padding:11px 14px;border-radius:14px;
+    border:1px solid var(--card-border);background:rgba(0,0,0,.25);
+    color:var(--ink);font-size:18px;font-weight:700;text-align:center;
+    outline:none;transition:.2s;
+  }
+  .input-row input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(179,136,255,.25)}
+  .input-row span{font-size:14px;color:var(--muted)}
+  .unit-note{font-size:11px;color:#7f77a6;margin-top:-6px}
+
+  .btn{
+    cursor:pointer;border:none;color:#fff;font-size:16px;font-weight:700;
+    padding:14px 38px;border-radius:16px;transition:.25s;
+    background:linear-gradient(120deg,var(--purple),var(--amber));
+    box-shadow:0 10px 24px rgba(179,136,255,.35);
+  }
+  .btn:hover{transform:translateY(-2px) scale(1.03);filter:brightness(1.1)}
+  .btn:active{transform:scale(.97)}
+  .btn.ghost{background:rgba(255,255,255,.1);box-shadow:none;border:1px solid var(--card-border);color:var(--ink)}
+
+  /* 运行中 */
+  .run{display:none;margin-top:6px;flex-direction:column;align-items:center;gap:12px}
+  .phase-tag{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:7px 16px;border-radius:999px;font-size:14px;font-weight:700;
+    background:rgba(255,209,102,.14);color:var(--gold);
+    border:1px solid rgba(255,209,102,.4);
+    transition:.4s;
+  }
+  .phase-tag .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);animation:pulse 1.2s infinite}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.5}}
+  .phase-tag.rest{background:rgba(29,233,182,.12);color:var(--teal2);border-color:rgba(29,233,182,.4)}
+  .phase-tag.rest .dot{background:var(--teal2)}
+
+  .ring-wrap{position:relative;width:230px;height:230px;margin:6px 0}
+  .ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ring-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:12}
+  .ring-prog{
+    fill:none;stroke:url(#grad);stroke-width:12;stroke-linecap:round;
+    transition:stroke-dashoffset .4s linear;
+    filter:drop-shadow(0 0 8px rgba(179,136,255,.6));
+  }
+  .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .time{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:2px;line-height:1}
+  .time-label{margin-top:6px;font-size:12px;color:var(--muted);letter-spacing:2px}
+
+  .hint{
+    font-size:14px;color:var(--muted);line-height:1.6;min-height:44px;
+    display:flex;align-items:center;justify-content:center;
+    transition:.3s;
+  }
+  .hint.reveal{color:var(--teal2);font-weight:700;font-size:16px}
+
+  .stats{display:flex;gap:26px;font-size:12px;color:var(--muted)}
+  .stats b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .stats span{opacity:.8}
+
+  /* 休息结束大提示 */
+  .flash{
+    position:fixed;inset:0;z-index:5;display:none;align-items:center;justify-content:center;
+    background:rgba(10,8,30,.55);backdrop-filter:blur(4px);
+  }
+  .flash.show{display:flex;animation:fade .25s both}
+  .flash-card{
+    background:linear-gradient(140deg,#241a45,#3a2f6b);border:1px solid var(--card-border);
+    border-radius:22px;padding:34px 40px;text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+    animation:pop .4s cubic-bezier(.2,.9,.3,1.4) both;
+  }
+  @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+  .flash-card .big{font-size:22px;font-weight:800;margin-bottom:10px}
+  .flash-card .subline{font-size:14px;color:var(--muted);margin-bottom:18px}
+  .flash-card .em{font-size:38px;font-weight:900;margin:6px 0 18px;color:var(--gold)}
+
+  footer{margin-top:18px;font-size:11px;color:#7f77a6}
+
+  /* ===== 励志走马灯 ===== */
+  .marquee{
+    margin:16px 0 6px;overflow:hidden;position:relative;height:32px;
+    border:1px solid var(--card-border);border-radius:12px;background:rgba(0,0,0,.2);
+  }
+  .marquee::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(90deg,rgba(15,12,41,.9),transparent 12%,transparent 88%,rgba(15,12,41,.9));}
+  .marquee-track{display:inline-flex;white-space:nowrap;will-change:transform;animation:scrollL linear infinite}
+  .marquee-track span{font-size:13px;color:var(--gold);padding:0 6px;line-height:32px;letter-spacing:.5px;opacity:.95}
+  @keyframes scrollL{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ===== 鼠标动态特效 ===== */
+  /* 跟随光斑 */
+  .cursor-glow{
+    position:fixed;left:0;top:0;width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(circle,rgba(179,136,255,.28),rgba(255,111,129,.12) 45%,transparent 70%);
+    pointer-events:none;z-index:1;mix-blend-mode:screen;
+    transform:translate(-50%,-50%);opacity:0;transition:opacity .3s, transform .18s ease-out;
+  }
+  .cursor-glow.on{opacity:1}
+  /* 点击涟漪 */
+  .ripple-layer{position:fixed;inset:0;z-index:8;pointer-events:none;overflow:hidden}
+  .ripple{
+    position:absolute;width:18px;height:18px;border-radius:50%;pointer-events:none;
+    transform:translate(-50%,-50%) scale(0);
+    background:radial-gradient(circle,rgba(255,255,255,.55),rgba(179,136,255,.35) 60%,transparent 80%);
+    animation:ripple .7s ease-out forwards;
+  }
+  @keyframes ripple{
+    to{transform:translate(-50%,-50%) scale(1);opacity:0}
+  }
+</style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <div class="orb a"></div>
+  <div class="orb b"></div>
+  <div class="orb c"></div>
+
+  <main class="card">
+    <div class="logo">Pomodoro · Surprise</div>
+    <h1>番茄·随机休息法</h1>
+    <p class="sub">工作时长你来定，休息的<b>时机</b>与<b>时长</b>全部随机<br>铃铛响起的那一刻，才是惊喜揭晓的瞬间</p>
+
+    <!-- 励志走马灯 -->
+    <div class="marquee"><div class="marquee-track" id="marqueeTrack"></div></div>
+
+    <!-- 设置 -->
+    <div class="setup" id="setup">
+      <label>设定本次专注工作时长</label>
+      <div class="input-row">
+        <input id="workMin" type="number" min="5" max="240" step="1" value="60">
+        <span>分钟</span>
+      </div>
+      <p class="unit-note">期间会随机插入 2~4 次休息，时机与时长未知</p>
+      <button class="btn" id="startBtn">开始专注</button>
+    </div>
+
+    <!-- 运行 -->
+    <div class="run" id="run">
+      <div class="phase-tag" id="phaseTag"><span class="dot"></span><span id="phaseText">专注中</span></div>
+
+      <div class="ring-wrap">
+        <svg viewBox="0 0 230 230">
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#b388ff"/>
+              <stop offset="1" stop-color="#ff9f43"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="115" cy="115" r="99"/>
+          <circle class="ring-prog" id="prog" cx="115" cy="115" r="99"
+                  stroke-dasharray="622" stroke-dashoffset="0"/>
+        </svg>
+        <div class="center">
+          <div class="time" id="timeDisplay">60:00</div>
+          <div class="time-label" id="timeLabel">本次专注</div>
+        </div>
+      </div>
+
+      <div class="hint" id="hint">等待铃铛…连我也不知道下一次休息何时到来</div>
+
+      <div class="stats">
+        <div class="stat"><b id="breaksDone">0</b><span>已完成休息</span></div>
+        <div class="stat"><b id="workDone">0%</b><span>专注进度</span></div>
+      </div>
+
+      <button class="btn ghost" id="stopBtn" style="margin-top:6px">结束本次</button>
+    </div>
+
+    <footer>不确定性，是最好的多巴胺触发器 🎯</footer>
+  </main>
+
+  <!-- 休息到达 / 结束 大弹层 -->
+  <div class="flash" id="flash">
+    <div class="flash-card">
+      <div class="big" id="flashTitle">🔔 休息时间到</div>
+      <div class="subline" id="flashSub">接下来休息多久？—— 刚刚随机生成</div>
+      <div class="em" id="flashEm">5:00</div>
+      <button class="btn" id="flashBtn">开始休息</button>
+    </div>
+  </div>
+
+<script>
+/* ============ 音效：用 Web Audio 生成铃声 ============ */
+let audioCtx=null;
+function ensureCtx(){ if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); } if(audioCtx.state==='suspended') audioCtx.resume(); return audioCtx; }
+function bell(tones=[523.25,659.25,783.99,1046.5],speed=0.12,vol=.35){
+  try{
+    const ctx=ensureCtx(); const t0=ctx.currentTime;
+    tones.forEach((f,i)=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.type='sine'; o.frequency.value=f;
+      const t=t0+i*speed;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(vol,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+1.4);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t); o.stop(t+1.5);
+    });
+  }catch(e){}
+}
+const bellBreak   =()=>bell([784,1174.7,1568],0.16,.4);      // 休息提醒（高亮惊喜）
+const bellRestEnd =()=>bell([659.25,523.25],0.22,.35);        // 休息结束
+const bellFinish  =()=>bell([523.25,659.25,783.99,1046.5,1318.5],0.13,.45); // 全部完成
+
+/* ============ 工具 ============ */
+const rndInt=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pad=n=>String(n).padStart(2,'0');
+function fmt(sec){ return pad(Math.floor(sec/60))+':'+pad(sec%60); }
+
+/* ============ 随机休息计划 ============ */
+function generateBreaks(Tmin){
+  const minGap=4;                     // 相邻休息间至少要专注的分钟数
+  if(Tmin < minGap+2) return [];
+  // 休息次数：随时长浮动，上限 4
+  let num=Math.min(4,Math.max(1,Math.floor(Tmin/15)));
+  while(num>1 && (num*minGap + num*2) > Tmin) num--;
+  const room=Tmin - num*minGap;
+  const maxDur=Math.max(2,Math.floor(room/num));   // 保证每段休息时长>=2
+  const dur=[]; let sumD=0;
+  for(let i=0;i<num;i++){ const d=Math.min(maxDur, rndInt(2,6)); dur.push(d); sumD+=d; }
+  // 把空闲时间随机撒进 num+1 个“工作槽”，保证间隔
+  const slack=Tmin - (num*minGap + sumD);
+  const slots=new Array(num+1).fill(minGap);
+  for(let s=0;s<slack;s++) slots[rndInt(0,num)]++;
+  let cursor=0, breaks=[];
+  for(let i=0;i<num;i++){
+    cursor+=slots[i];
+    breaks.push({workMin:cursor, durMin:dur[i]});
+    cursor+=dur[i];
+  }
+  return breaks;
+}
+
+/* ============ 状态 ============ */
+let S={
+  workTotalSec:0, workElapsedSec:0,
+  restTotalSec:0, restElapsedSec:0,
+  phase:'idle',              // idle | working | resting | finished
+  breaks:[], idx:0, breaksDone:0,
+  _workOffsets:[],
+  lastTick:null, acc:0, timer:null
+};
+
+const $=id=>document.getElementById(id);
+const RING_C=622; // 2π*99
+
+function setPhase(p){
+  S.phase=p;
+  const tag=$('phaseTag');
+  tag.classList.toggle('rest', p==='resting');
+  if(p==='working'){ $('phaseText').textContent='专注中'; $('timeLabel').textContent='本次专注'; }
+  else if(p==='resting'){ $('phaseText').textContent='休息中 · 惊喜时刻'; $('timeLabel').textContent='本次休息'; }
+}
+
+function nextBreakOffsetSec(){ return S.idx < S.breaks.length ? S.breaks[S.idx].workMin*60 : Infinity; }
+
+/* 休息到达：弹窗揭晓随机时长 */
+function triggerBreak(){
+  bellBreak();
+  const b=S.breaks[S.idx];
+  S.restTotalSec=b.durMin*60; S.restElapsedSec=0;
+  $('flashTitle').textContent='🔔 休息时间到';
+  $('flashSub').textContent='接下来休息多久？——刚刚随机生成，连计划表自己都不知道';
+  $('flashEm').textContent=fmt(S.restTotalSec);
+  $('flashBtn').textContent='开始休息';
+  $('flashBtn').dataset.mode='startRest';
+  $('flash').classList.add('show');
+}
+function startRest(){
+  setPhase('resting');
+  $('hint').textContent='尽情放松吧，铃铛会提醒你回来的';
+  $('hint').classList.remove('reveal');
+}
+function endRest(){
+  bellRestEnd();
+  S.idx++; S.breaksDone++;
+  $('breaksDone').textContent=S.breaksDone;
+  setPhase('working');
+  $('hint').textContent='休息结束，回到专注。下一次惊喜会悄悄靠近…';
+  $('hint').classList.add('reveal');
+  $('timeDisplay').textContent=fmt(S.workTotalSec - S.workElapsedSec);
+}
+function finishAll(){
+  bellFinish();
+  S.phase='finished';
+  $('flashTitle').textContent='🎉 本次专注全部完成';
+  $('flashSub').textContent=`共完成 ${S.breaksDone} 次随机休息，全程 ${Math.round(S.workTotalSec/60)} 分钟`;
+  $('flashEm').textContent='Done!';
+  $('flashBtn').textContent='结束';
+  $('flashBtn').dataset.mode='finish';
+  $('flash').classList.add('show');
+}
+
+/* 每秒推进 */
+function advance(){
+  if(S.phase==='working'){
+    S.workElapsedSec++;
+    const left=S.workTotalSec - S.workElapsedSec;
+    $('timeDisplay').textContent=fmt(left);
+    // 进度环：以专注进度计
+    $('prog').style.strokeDashoffset = RING_C*(1 - S.workElapsedSec/S.workTotalSec);
+    $('workDone').textContent=Math.round(S.workElapsedSec/S.workTotalSec*100)+'%';
+    // 是否到达休息点
+    if(S.workElapsedSec >= nextBreakOffsetSec()){
+      triggerBreak();
+      // 触发时把当前秒退回去，等休息结束后继续
+      S.workElapsedSec--;
+      return;
+    }
+    // 接近休息时的悬念文案
+    const distMin=(nextBreakOffsetSec()-S.workElapsedSec)/60;
+    if(S.idx<S.breaks.length){
+      if(distMin<=1) $('hint').textContent='悬念进入倒计时…铃铛快要响了';
+      else if(distMin<=3) $('hint').textContent='神秘铃铛越来越近，保持好奇';
+      else $('hint').textContent='等待铃铛…连我也不知道下一次休息何时到来';
+    }
+  }else if(S.phase==='resting'){
+    S.restElapsedSec++;
+    const left=S.restTotalSec - S.restElapsedSec;
+    $('timeDisplay').textContent=fmt(left);
+    $('prog').style.strokeDashoffset = RING_C*(1 - S.restElapsedSec/S.restTotalSec);
+    if(left<=0) endRest();
+  }
+}
+
+function tick(){
+  const now=Date.now();
+  if(S.lastTick==null){ S.lastTick=now; return; }
+  const dt=Math.min(now-S.lastTick,1000); S.lastTick=now;
+  S.acc+=dt;
+  while(S.acc>=1000){ S.acc-=1000; advance(); }
+  // 完成判定
+  if(S.phase==='working' && S.workElapsedSec>=S.workTotalSec) finishAll();
+}
+
+function startTimer(){
+  if(S.timer) clearInterval(S.timer);
+  S.lastTick=null; S.acc=0;
+  S.timer=setInterval(tick,200);
+}
+
+/* ============ 交互 ============ */
+$('startBtn').addEventListener('click',()=>{
+  let m=parseInt($('workMin').value,10);
+  if(!m||m<5) m=5; if(m>240) m=240; $('workMin').value=m;
+  S.workTotalSec=m*60; S.workElapsedSec=0;
+  S.breaks=generateBreaks(m);
+  if(S.breaks.length===0){  // 太短，随机塞一段休息
+    S.breaks=[{workMin:Math.max(2,Math.round(m/2)),durMin:Math.min(m-3,2)}];
+  }
+  S.idx=0; S.breaksDone=0;
+  $('breaksDone').textContent='0';
+  $('workDone').textContent='0%';
+  $('hint').classList.remove('reveal');
+  $('hint').textContent='等待铃铛…连我也不知道下一次休息何时到来';
+  $('prog').style.strokeDashoffset=RING_C;
+  $('setup').style.display='none';
+  $('run').style.display='flex';
+  setPhase('working');
+  $('timeDisplay').textContent=fmt(S.workTotalSec);
+  startTimer();
+});
+
+$('flashBtn').addEventListener('click',()=>{
+  const mode=$('flashBtn').dataset.mode;
+  $('flash').classList.remove('show');
+  if(mode==='startRest') startRest();
+  else stopSession(true);
+});
+
+$('stopBtn').addEventListener('click',()=>stopSession(true));
+
+function stopSession(confirm){
+  if(S.timer){ clearInterval(S.timer); S.timer=null; }
+  S.phase='idle';
+  $('run').style.display='none';
+  $('setup').style.display='flex';
+  $('flash').classList.remove('show');
+}
+
+/* ============ 励志走马灯 ============ */
+const QUOTES=[
+  "你现在的努力，是未来那个你感谢的自己",
+  "不积跬步，无以至千里",
+  "再多一点耐心，奇迹正在路上",
+  "把今天做到极致，明天自有答案",
+  "专注本身，就是最好的天赋",
+  "黑暗的尽头是光，坚持的尽头是奖赏",
+  "每一次小小的专注，都在改写你的下限",
+  "别怕走得慢，只怕原地停留",
+  "自律给你自由，专注给你掌控",
+  "种子在泥土里安静生长，才能开出惊艳的花",
+  "今天的每一分钟，都不会白费",
+  "做成事的人，不是天才，是熬得住的人",
+  "先专注，后收获，顺序别乱",
+  "你负责投入，结果交给时间",
+  "认真起来，连宇宙都会帮忙",
+  "低谷不是尽头，是蓄力的地方",
+  "熬过无人问津，才配得上诗和远方",
+  "时间不会辜负每一个埋头的人"
+];
+function shuffle(a){const x=a.slice();for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]];}return x;}
+function buildMarquee(){
+  const picks=shuffle(QUOTES).slice(0,6);
+  const items=picks.map(q=>`<span>✨ ${q}  ·  </span>`).join('');
+  $('marqueeTrack').innerHTML=items+items; // 两份实现无缝循环
+  $('marqueeTrack').style.animationDuration=(16+Math.random()*10)+'s';
+  $('marqueeTrack').style.animation='none';
+  void $('marqueeTrack').offsetWidth;
+  $('marqueeTrack').style.animation='';
+}
+
+/* ============ 鼠标动态特效 ============ */
+// 跟随光斑：鼠标移到哪，柔光跟到哪
+const cursorGlow=document.createElement('div');
+cursorGlow.className='cursor-glow';
+document.body.appendChild(cursorGlow);
+
+let mx=innerWidth/2, my=innerHeight/2, gx=mx, gy=my;
+const card=document.querySelector('.card');
+function tilt(){
+  const r=card.getBoundingClientRect();
+  const px=(mx-r.left)/r.width-0.5;
+  const py=(my-r.top)/r.height-0.5;
+  card.style.transform=`perspective(900px) rotateX(${(-py*5).toFixed(2)}deg) rotateY(${(px*5).toFixed(2)}deg)`;
+}
+window.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; tilt(); });
+// 载入动画结束后解除卡片动画占用，让倾斜生效
+card.addEventListener('animationend',()=>{ card.style.animation='none'; },{once:true});
+card.addEventListener('mouseleave',()=>{ card.style.transform=''; });
+(function glowLoop(){
+  gx+=(mx-gx)*0.14; gy+=(my-gy)*0.14;
+  cursorGlow.style.left=gx+'px';
+  cursorGlow.style.top=gy+'px';
+  cursorGlow.classList.add('on');
+  requestAnimationFrame(glowLoop);
+})();
+
+// 点击涟漪
+const rippleLayer=document.createElement('div');
+rippleLayer.className='ripple-layer';
+document.body.appendChild(rippleLayer);
+document.addEventListener('pointerdown',e=>{
+  const r=document.createElement('span');
+  r.className='ripple';
+  r.style.left=e.clientX+'px'; r.style.top=e.clientY+'px';
+  const s=16+Math.random()*30;
+  r.style.width=s+'px'; r.style.height=s+'px';
+  rippleLayer.appendChild(r);
+  r.addEventListener('animationend',()=>r.remove());
+});
+
+/* 星尘背景 & 走马灯初始化 */
+(function(){
+  buildMarquee();
+  const box=$('stars');
+  for(let i=0;i<34;i++){
+    const s=document.createElement('i');
+    s.style.left=(Math.random()*100)+'%';
+    s.style.top=(Math.random()*100)+'%';
+    s.style.animationDelay=(Math.random()*5)+'s';
+    s.style.animationDuration=(4+Math.random()*5)+'s';
+    box.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
